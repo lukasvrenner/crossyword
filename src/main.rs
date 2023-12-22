@@ -14,21 +14,20 @@ fn main() -> std::io::Result<()> {
     let wordfile = fs::read_to_string("./words.txt")?;
 
     let all_words: Vec<&str> = wordfile.lines().collect();
-    let words_list = get_random_words(all_words);
+    let word_list = get_random_words(all_words);
     let mut words: Vec<Word> = Vec::new();
 
-    for item in words_list {
-        let split_item: Vec<&str> = item.split(".").collect();
-        let word = split_item[0];
-        let definition = split_item[1];
+    // format words_list
+    for item in word_list {
+        let split_item: Vec<&str> = item.split('.').collect();
         words.push(Word {
-            word,
-            definition,
+            word: split_item[0],
+            definition: split_item[1],
             is_verticle: false,
         })
     }
     
-    // test word to prevent compiler error
+    // test word to prevent compile-time error
     // remove from final version
     let test_word = Word {
         word: "hello",
@@ -39,11 +38,12 @@ fn main() -> std::io::Result<()> {
     println!("{}", test_word.definition);
     println!("{}", test_word.is_verticle);
 
-    println!("{:?}", words.len());
+    println!("{:?}", words);
 
     Ok(())
 }
 
+// takes ownership because original list is no longer needed
 fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     let mut rng = thread_rng();
     let random_indices = rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
