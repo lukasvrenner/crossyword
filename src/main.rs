@@ -40,6 +40,7 @@ fn get_random_words(word_list: Vec<Word>) -> Vec<Word<'_>> {
     let mut rng = thread_rng();
     let random_indices = rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
     let mut random_words: Vec<Word> = Vec::new();
+
     for index in random_indices {
         random_words.push(word_list[index]);
     }
