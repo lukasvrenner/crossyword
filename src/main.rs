@@ -8,13 +8,14 @@ struct Word<'a> {
     word: &'a str,
     definition: &'a str,
     is_verticle: bool,
+    letter_matches: Option<[u8; 2]>
 }
 
 fn main() -> std::io::Result<()> {
     let wordfile = fs::read_to_string("./words.txt")?;
 
     let all_words: Vec<&str> = wordfile.lines().collect();
-    let word_list = get_random_words(all_words);
+    let word_list = get_random_words(all_words); // takes ownership of all_words
     let mut words: Vec<Word> = Vec::new();
 
     // format words_list
@@ -24,6 +25,7 @@ fn main() -> std::io::Result<()> {
             word: split_item[0],
             definition: split_item[1],
             is_verticle: false,
+            letter_matches: None,
         })
     }
     
@@ -33,10 +35,12 @@ fn main() -> std::io::Result<()> {
         word: "hello",
         definition: "world",
         is_verticle: false,
+        letter_matches: None,
     };
     println!("{}", test_word.word);
     println!("{}", test_word.definition);
     println!("{}", test_word.is_verticle);
+    println!("{:?}", test_word.letter_matches);
 
     println!("{:?}", words);
 
@@ -46,7 +50,8 @@ fn main() -> std::io::Result<()> {
 // takes ownership because original list is no longer needed
 fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     let mut rng = thread_rng();
-    let random_indices = rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
+    let random_indices = 
+        rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
     let mut random_words: Vec<&str> = Vec::new();
 
     for index in random_indices {
