@@ -4,6 +4,7 @@ use rand::thread_rng;
 const NUM_WORDS: usize = 10;
 
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)] // not everything is implemented yet
 struct Word<'a> {
     word: &'a str,
     definition: &'a str,
@@ -29,20 +30,7 @@ fn main() -> std::io::Result<()> {
         })
     }
     
-    // test word to prevent compile-time error
-    // remove from final version
-    let test_word = Word {
-        word: "hello",
-        definition: "world",
-        is_verticle: false,
-        letter_matches: None,
-    };
-    println!("{}", test_word.word);
-    println!("{}", test_word.definition);
-    println!("{}", test_word.is_verticle);
-    println!("{:?}", test_word.letter_matches);
-
-    println!("{:?}", words);
+    println!("{:?}", words[0]);
 
     Ok(())
 }
