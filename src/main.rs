@@ -1,4 +1,3 @@
-use std::io;
 use std::fs;
 use rand::thread_rng;
 
@@ -8,17 +7,24 @@ const NUM_WORDS: usize = 10;
 struct Word<'a> {
     word: &'a str,
     definition: &'a str,
+    is_verticle: bool,
 }
-fn main() -> io::Result<()> {
+
+fn main() -> std::io::Result<()> {
     let wordfile = fs::read_to_string("./words.txt")?;
-    let mut word_list: Vec<Word> = Vec::new();
-    for item in wordfile.lines() {
+
+    let all_words: Vec<&str> = wordfile.lines().collect();
+    let words_list = get_random_words(all_words);
+    let mut words: Vec<Word> = Vec::new();
+
+    for item in words_list {
         let split_item: Vec<&str> = item.split(".").collect();
         let word = split_item[0];
         let definition = split_item[1];
-        word_list.push(Word {
+        words.push(Word {
             word,
             definition,
+            is_verticle: false,
         })
     }
     
@@ -27,23 +33,24 @@ fn main() -> io::Result<()> {
     let test_word = Word {
         word: "hello",
         definition: "world",
+        is_verticle: false,
     };
     println!("{}", test_word.word);
     println!("{}", test_word.definition);
+    println!("{}", test_word.is_verticle);
 
-    println!("{:?}", word_list[0]);
-    println!("{:?}", get_random_words(word_list));
+    println!("{:?}", words.len());
+
     Ok(())
 }
 
-fn get_random_words(word_list: Vec<Word>) -> Vec<Word<'_>> {
+fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     let mut rng = thread_rng();
     let random_indices = rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
-    let mut random_words: Vec<Word> = Vec::new();
+    let mut random_words: Vec<&str> = Vec::new();
 
     for index in random_indices {
         random_words.push(word_list[index]);
     }
     random_words
-
 }
