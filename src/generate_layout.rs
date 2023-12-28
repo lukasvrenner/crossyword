@@ -11,7 +11,7 @@ pub struct Word<'a> {
 impl Word<'_> {
     fn calc_position<'a>(
         &'a self, placed_words: &[PlacedWord<'a>])
-        -> PlacedWord<'a> {
+        -> Option<PlacedWord<'a>> {
             let mut y_pos: isize = 0;
             let mut x_pos: isize = 0;
             let mut is_verticle: bool = false;
@@ -36,13 +36,16 @@ impl Word<'_> {
                 }
             }
             let pos = [x_pos, y_pos];
-            PlacedWord {
+            let new_word = PlacedWord {
                 word: self.word,
                 clue: self.clue,
                 is_verticle,
                 pos,
+            };
+            if illegal_overlap(&new_word, &placed_words) {
+                return None
             }
-            // todo!();
+            Some(new_word)
         }
 }
 
@@ -83,11 +86,8 @@ fn generate_layout<'a>(word_list: &'a [Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
     let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
     for word in word_list {
-        let new_word = word.calc_position(&placed_words);
-        if !illegal_overlap(&new_word, &placed_words) {
-            placed_words.push(new_word);
-        }
-        return None
+        let new_word = word.calc_position(&placed_words)?;
+        placed_words.push(new_word);
     }
     Some(placed_words)
 }
@@ -96,19 +96,6 @@ fn generate_layout<'a>(word_list: &'a [Word<'a>])
 fn illegal_overlap(
     next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>])
 -> bool {
-    for placed_word in placed_words {
-        // if facing opposite directions
-        if next_word.is_verticle ^ placed_word.is_verticle {
-            return
-                next_word.pos[next_word.is_verticle as usize] -
-                placed_word.pos[next_word.is_verticle as usize] > next_word.word.len().try_into().unwrap() &&
-                placed_word.pos[placed_word.is_verticle as usize] -
-                next_word.pos[placed_word.is_verticle as usize] > next_word.word.len().try_into().unwrap();
-        }
-        // if facing same direction
-        // word.pos[word.is_verticle as usize] < placed_word.pos[word.is_verticle] * 
-
-    }
     todo!();
 }
 
