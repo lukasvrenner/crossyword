@@ -22,6 +22,7 @@ pub struct PlacedWord<'a> {
     pub is_verticle: bool,
     pub pos: [i8; 2],
 }
+
 // takes ownership because original list is no longer needed
 pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     let mut rng = thread_rng();
@@ -34,6 +35,8 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     }
     random_words
 }
+
+// repeats until a sucessful layout is created
 pub fn extract_layout<'a>(words: &[Word<'a>])
 -> Vec<PlacedWord<'a>> {
     let wrapped_layout = generate_layout(&words);
@@ -42,7 +45,6 @@ pub fn extract_layout<'a>(words: &[Word<'a>])
         None => extract_layout(words)
     }
 }
-
 
 /* we return an Option because
  *  we do the same thing regardless
@@ -134,14 +136,12 @@ mod tests {
  --- --- ---
     | s | i |
  --- --- --- --- ---
-| o | ! | g | h | t |
+| o | e | g | h | t |
  --- --- --- --- ---
-    | e | e |
+    | s | e |
      --- ---
     | s | r |
      --- ---
-    | s |
-     ---
 */
         let opposite_orientation_legal: &PlacedWord<'_> = 
             &PlacedWord {
