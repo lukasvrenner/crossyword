@@ -10,9 +10,39 @@ pub struct Word<'a> {
 
 impl Word<'_> {
     fn calc_position<'a>(
-        &self, placed_words: &[PlacedWord<'a>])
-        -> Option<PlacedWord<'a>> {
-            todo!();
+        &'a self, placed_words: &[PlacedWord<'a>])
+        -> PlacedWord<'a> {
+            let mut y_pos: isize = 0;
+            let mut x_pos: isize = 0;
+            let mut is_verticle: bool = false;
+            for placed_word in placed_words {
+                is_verticle = !placed_word.is_verticle;
+                if placed_word.is_verticle {
+                    for (letter_index, letter) in self.word.chars().enumerate() {
+                        x_pos = placed_word.pos[0] - letter_index as isize;
+                        y_pos = match placed_word.word.find(letter) {
+                            Some(index) => index as isize,
+                            None => break,
+                        }
+                    }
+                } else {
+                    for (letter_index, letter) in self.word.chars().enumerate() {
+                        y_pos = placed_word.pos[1] - letter_index as isize;
+                        x_pos = match placed_word.word.find(letter) {
+                            Some(index) => index as isize,
+                            None => break,
+                        }
+                    }
+                }
+            }
+            let pos = [x_pos, y_pos];
+            PlacedWord {
+                word: self.word,
+                clue: self.clue,
+                is_verticle,
+                pos,
+            }
+            // todo!();
         }
 }
 
@@ -20,7 +50,7 @@ pub struct PlacedWord<'a> {
     pub word: &'a str,
     clue: &'a str,
     pub is_verticle: bool,
-    pub pos: [i8; 2],
+    pub pos: [isize; 2],
 }
 
 // takes ownership because original list is no longer needed
@@ -37,7 +67,7 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
 }
 
 // repeats until a sucessful layout is created
-pub fn extract_layout<'a>(words: &[Word<'a>])
+pub fn extract_layout<'a>(words: &'a [Word<'a>])
 -> Vec<PlacedWord<'a>> {
     let wrapped_layout = generate_layout(&words);
     match wrapped_layout {
@@ -49,16 +79,15 @@ pub fn extract_layout<'a>(words: &[Word<'a>])
 /* we return an Option because
  *  we do the same thing regardless
  *  of the type of error*/
-fn generate_layout<'a>(word_list: &[Word<'a>])
+fn generate_layout<'a>(word_list: &'a [Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
-    let mut placed_words: Vec<PlacedWord<'_>> = Vec::new();
+    let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
     for word in word_list {
-        let new_word = word.calc_position(&placed_words)?;
+        let new_word = word.calc_position(&placed_words);
         if !illegal_overlap(&new_word, &placed_words) {
             placed_words.push(new_word);
-        } else {
-            return None;
         }
+        return None
     }
     Some(placed_words)
 }
@@ -106,7 +135,6 @@ mod tests {
             pos: [0, 2],
         }
     ];
-
 /*
  --- --- ---
 | c | a | t |
@@ -120,7 +148,6 @@ mod tests {
         | r |
          ---
 */
-
     #[test]
     fn overlap() {
         let opposite_orientation_illegal: &PlacedWord<'_> = 
@@ -167,6 +194,13 @@ mod tests {
     | a |
      ---
 */
+        let same_orientation_illegal: &PlacedWord<'_> = 
+            &PlacedWord {
+                word: "alumina",
+                clue: "aluminium oxide",
+                is_verticle: true,
+                pos: [1, 0],
+            };
         assert!(illegal_overlap(opposite_orientation_illegal, PLACED_WORDS));
         assert!(!illegal_overlap(opposite_orientation_legal, PLACED_WORDS));
     }
