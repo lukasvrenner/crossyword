@@ -15,11 +15,11 @@ fn main() -> std::io::Result<()> {
         let split_item: Vec<&str> = item.split('.').collect();
         words.push(Word {
             word: split_item[0],
-            definition: split_item[1],
+            clue: split_item[1],
         })
     }
     println!("{:?}", words[0]);
-    let puzzle = extract_layout(words);
+    let puzzle = extract_layout(&words);
 
     Ok(())
 }

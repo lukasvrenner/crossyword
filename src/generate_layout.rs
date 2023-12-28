@@ -5,23 +5,22 @@ const NUM_WORDS: usize = 10;
 #[derive(Debug)]
 pub struct Word<'a> {
     pub word: &'a str,
-    pub definition: &'a str,
+    pub clue: &'a str,
 }
 
 impl Word<'_> {
     fn calc_position<'a>(
-        &self, placed_words: &Vec<PlacedWord<'a>>)
+        &self, placed_words: &[PlacedWord<'a>])
         -> Option<PlacedWord<'a>> {
             todo!();
         }
 }
 
 pub struct PlacedWord<'a> {
-    word: &'a str,
-    definition: &'a str,
-    is_verticle: bool,
-    pos: [usize; 2],
-    letter_matches: Option<[usize; 2]>
+    pub word: &'a str,
+    clue: &'a str,
+    pub is_verticle: bool,
+    pub pos: [i8; 2],
 }
 // takes ownership because original list is no longer needed
 pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
@@ -35,7 +34,7 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     }
     random_words
 }
-pub fn extract_layout<'a>(words: Vec<Word<'a>>)
+pub fn extract_layout<'a>(words: &[Word<'a>])
 -> Vec<PlacedWord<'a>> {
     let wrapped_layout = generate_layout(&words);
     match wrapped_layout {
@@ -48,7 +47,7 @@ pub fn extract_layout<'a>(words: Vec<Word<'a>>)
 /* we return an Option because
  *  we do the same thing regardless
  *  of the type of error*/
-fn generate_layout<'a>(word_list: &Vec<Word<'a>>)
+fn generate_layout<'a>(word_list: &[Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
     let mut placed_words: Vec<PlacedWord<'_>> = Vec::new();
     for word in word_list {
@@ -64,20 +63,57 @@ fn generate_layout<'a>(word_list: &Vec<Word<'a>>)
 
 // PROBABLY DOESN'T WORK
 fn illegal_overlap(
-    next_word: &PlacedWord<'_>, placed_words: &Vec<PlacedWord<'_>>)
+    next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>])
 -> bool {
     for placed_word in placed_words {
         // if facing opposite directions
         if next_word.is_verticle ^ placed_word.is_verticle {
             return
                 next_word.pos[next_word.is_verticle as usize] -
-                placed_word.pos[next_word.is_verticle as usize] > next_word.word.len() &&
+                placed_word.pos[next_word.is_verticle as usize] > next_word.word.len().try_into().unwrap() &&
                 placed_word.pos[placed_word.is_verticle as usize] -
-                next_word.pos[placed_word.is_verticle as usize] > next_word.word.len();
+                next_word.pos[placed_word.is_verticle as usize] > next_word.word.len().try_into().unwrap();
         }
         // if facing same direction
         // word.pos[word.is_verticle as usize] < placed_word.pos[word.is_verticle] * 
 
     }
     todo!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const PLACED_WORDS: &[PlacedWord<'_>] = &[
+        PlacedWord {
+            word: "cat",
+            clue: "an animal of group cat",
+            is_verticle: false,
+            pos: [0, 0],
+        },
+        PlacedWord {
+            word: "tiger",
+            clue: "a wild species of cat",
+            is_verticle: true,
+            pos: [2, 0],
+        },
+        PlacedWord {
+            word: "ought",
+            clue: "should",
+            is_verticle: false,
+            pos: [0, 2],
+        }
+    ];
+
+    #[test]
+    fn opposite_orientation_overlap() {
+        let next_word: &PlacedWord<'_> = 
+            &PlacedWord {
+                word: "asess",
+                clue: "to determine information from",
+                is_verticle: true,
+                pos: [1, -2],
+            };
+        assert!(illegal_overlap(next_word, PLACED_WORDS))
+    }
 }
