@@ -4,4 +4,5 @@
 
 ## Using your own words
 - crossyword does not yet support custom files, but you can edit `words.txt` to add your own words
-- place each new word on a new line, and seperate the word and clue with a period (.)
+- Place each new word on a new line, and seperate the word and clue with a period (.)
+- For example: `alumina.Aluminium oxide`    
