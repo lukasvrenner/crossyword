@@ -105,15 +105,69 @@ mod tests {
         }
     ];
 
+/*
+ --- --- ---
+| c | a | t |
+ --- --- ---
+        | i |
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+        | e |
+         ---
+        | r |
+         ---
+*/
+
     #[test]
-    fn opposite_orientation_overlap() {
-        let next_word: &PlacedWord<'_> = 
+    fn overlap() {
+        let opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
                 word: "asess",
                 clue: "to determine information from",
                 is_verticle: true,
-                pos: [1, -2],
+                pos: [1, 0],
             };
-        assert!(illegal_overlap(next_word, PLACED_WORDS))
+/*
+ --- --- ---
+| c | a | t |
+ --- --- ---
+    | s | i |
+ --- --- --- --- ---
+| o | ! | g | h | t |
+ --- --- --- --- ---
+    | e | e |
+     --- ---
+    | s | r |
+     --- ---
+    | s |
+     ---
+*/
+        let opposite_orientation_legal: &PlacedWord<'_> = 
+            &PlacedWord {
+                word: "alumina",
+                clue: "aluminium oxide",
+                is_verticle: true,
+                pos: [1, 0],
+            };
+/*
+ --- --- ---
+| c | a | t |
+ --- --- ---
+    | l | i |
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+    | m | e |
+     --- ---
+    | i | r |
+     --- ---
+    | n |
+     ---
+    | a |
+     ---
+*/
+        assert!(illegal_overlap(opposite_orientation_illegal, PLACED_WORDS));
+        assert!(!illegal_overlap(opposite_orientation_legal, PLACED_WORDS));
     }
 }
