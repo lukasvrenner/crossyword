@@ -36,19 +36,20 @@ impl Word<'_> {
                 }
             }
             let pos = [x_pos, y_pos];
-            let new_word = PlacedWord {
+            let next_word = PlacedWord {
                 word: self.word,
                 clue: self.clue,
                 is_verticle,
                 pos,
             };
-            if illegal_overlap(&new_word, &placed_words) {
+            if illegal_overlap(&next_word, placed_words) {
                 return None
             }
-            Some(new_word)
+            Some(next_word)
         }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     clue: &'a str,
@@ -72,7 +73,7 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
 // repeats until a sucessful layout is created
 pub fn extract_layout<'a>(words: &'a [Word<'a>])
 -> Vec<PlacedWord<'a>> {
-    let wrapped_layout = generate_layout(&words);
+    let wrapped_layout = generate_layout(words);
     match wrapped_layout {
         Some(layout) => layout,
         None => extract_layout(words)
@@ -210,7 +211,7 @@ mod tests {
     fn overlap() {
         let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
-                word: "asess",
+                word: "assess",
                 clue: "to determine information from",
                 is_verticle: true,
                 pos: [1, 0],
@@ -223,12 +224,12 @@ mod tests {
  --- --- --- --- ---
 | o | ! | g | h | t |
  --- --- --- --- ---
-    | s | e |   | t |
+    | e | e |   | t |
      --- ---     ---
     | s | r |   | e |
      --- ---     ---
-                | r |
-                 ---
+    | s |       | r |
+     ---         ---
 */
 
         let vert_opposite_orientation_legal: &PlacedWord<'_> = 
@@ -305,6 +306,53 @@ mod tests {
         assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
         assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
         assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
+    }
 
+    #[test]
+    fn position() {
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+        | i |   | a | 
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+        | e |   | t |
+         ---     ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
+*/
+        let crouch: Word<'_> = 
+            Word {
+                word: "crouch",
+                clue: "kneel",
+            };
+
+        let crouch_placed: PlacedWord<'_> = 
+            PlacedWord {
+                word: "crouch",
+                clue: "kneel",
+                is_verticle: true,
+                pos: [0, 0],
+            };
+        assert_eq!(crouch.calc_position(PLACED_WORDS), Some(crouch_placed));
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+| r |   | i |   | a | 
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+| u |   | e |   | t |
+ ---     ---     ---
+| c |   | r |   | e |
+ ---     ---     ---
+| h |           | r |
+ ---             ---
+*/
     }
 }
