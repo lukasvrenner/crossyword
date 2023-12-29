@@ -182,24 +182,33 @@ mod tests {
             clue: "should",
             is_verticle: false,
             pos: [0, 2],
+        },
+        PlacedWord {
+            word: "batter",
+            clue: "hit repeatedly",
+            is_verticle: true,
+            pos: [5, 0],
         }
+
     ];
 /*
- --- --- ---
-| c | a | t |
- --- --- ---
-        | i |
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+        | i |   | a | 
  --- --- --- --- ---
 | o | u | g | h | t |
  --- --- --- --- ---
-        | e |
-         ---
-        | r |
-         ---
+        | e |   | t |
+         ---     ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
 */
     #[test]
     fn overlap() {
-        let opposite_orientation_illegal: &PlacedWord<'_> = 
+        let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
                 word: "asess",
                 clue: "to determine information from",
@@ -207,19 +216,22 @@ mod tests {
                 pos: [1, 0],
             };
 /*
- --- --- ---
-| c | a | t |
- --- --- ---
-    | s | i |
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+    | s | i |   | a |
  --- --- --- --- ---
 | o | ! | g | h | t |
  --- --- --- --- ---
-    | s | e |
-     --- ---
-    | s | r |
-     --- ---
+    | s | e |   | t |
+     --- ---     ---
+    | s | r |   | e |
+     --- ---     ---
+                | r |
+                 ---
 */
-        let opposite_orientation_legal: &PlacedWord<'_> = 
+
+        let vert_opposite_orientation_legal: &PlacedWord<'_> = 
             &PlacedWord {
                 word: "alumina",
                 clue: "aluminium oxide",
@@ -227,30 +239,72 @@ mod tests {
                 pos: [1, 0],
             };
 /*
- --- --- ---
-| c | a | t |
- --- --- ---
-    | l | i |
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+    | l | i |   | a |
  --- --- --- --- ---
 | o | u | g | h | t |
  --- --- --- --- ---
-    | m | e |
-     --- ---
-    | i | r |
-     --- ---
-    | n |
-     ---
+    | m | e |   | t |
+     --- ---     ---
+    | i | r |   | e |
+     --- ---     ---
+    | n |       | r |
+     ---         --- 
     | a |
      ---
 */
-        let same_orientation_illegal: &PlacedWord<'_> = 
+
+        let hori_opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
-                word: "alumina",
-                clue: "aluminium oxide",
+                word: "bitter",
+                clue: "having a sharp, pungent taste or smell",
                 is_verticle: true,
                 pos: [1, 0],
             };
-        assert!(illegal_overlap(opposite_orientation_illegal, PLACED_WORDS));
-        assert!(!illegal_overlap(opposite_orientation_legal, PLACED_WORDS));
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- --- --- --- --- ---
+    | b | i | t | ! | e | r |
+ --- --- --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+        | e |   | t |
+         ---     ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
+*/
+        let hori_opposite_orientation_legal: &PlacedWord<'_> = 
+            &PlacedWord {
+                word: "bit",
+                clue: "small amount",
+                is_verticle: false,
+                pos: [1, 1],
+            };
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- --- --- ---
+    | b | i | t | a | 
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- ---
+        | e |   | t |
+         ---     ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
+*/
+        
+        assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
+        assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
+        assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
+        assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
+
     }
 }
