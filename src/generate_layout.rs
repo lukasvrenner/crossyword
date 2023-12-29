@@ -96,7 +96,69 @@ fn generate_layout<'a>(word_list: &'a [Word<'a>])
 fn illegal_overlap(
     next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>])
 -> bool {
-    todo!();
+    let mut illegal = false;
+    if next_word.is_verticle {
+        for placed_word in placed_words {
+            if !placed_word.is_verticle {
+                illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
+                    next_word.pos[0] - placed_word.pos[0]
+                    < placed_word.word.len() as isize
+                    &&
+                    placed_word.pos[1] - next_word.pos[1] >= 0 &&
+                    placed_word.pos[1] - next_word.pos[1]
+                    < next_word.word.len() as isize
+                    &&
+                    next_word.word.chars().nth(
+                        (placed_word.pos[1] - next_word.pos[1]) as usize
+                        )
+                    !=
+                    placed_word.word.chars().nth(
+                        (next_word.pos[0] - placed_word.pos[0]) as usize
+                        );
+            } else {
+                illegal = 
+                    next_word.pos[1] - placed_word.pos[1]
+                    > next_word.word.len() as isize
+                    &&
+                    placed_word.pos[1] - next_word.pos[1] 
+                    > placed_word.word.len() as isize;
+            }
+            if illegal {
+                break;
+            }
+        }
+    } else {
+        for placed_word in placed_words {
+            if placed_word.is_verticle {
+                illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
+                    placed_word.pos[0] - next_word.pos[0]
+                    < next_word.word.len() as isize
+                    &&
+                    next_word.pos[1] - placed_word.pos[1] >= 0 &&
+                    next_word.pos[1] - placed_word.pos[1]
+                    < placed_word.word.len() as isize
+                    &&
+                    placed_word.word.chars().nth(
+                        (next_word.pos[1] - placed_word.pos[1]) as usize
+                        )
+                    !=
+                    next_word.word.chars().nth(
+                        (placed_word.pos[0] - next_word.pos[0]) as usize
+                        );
+            } else {
+                illegal = 
+                    next_word.pos[0] - placed_word.pos[0]
+                    > next_word.word.len() as isize
+                    &&
+                    placed_word.pos[0] - next_word.pos[0] 
+                    > placed_word.word.len() as isize;
+            }
+            if illegal {
+                break;
+            }
+        }
+    }
+    illegal
 }
 
 #[cfg(test)]
@@ -150,7 +212,7 @@ mod tests {
  --- --- ---
     | s | i |
  --- --- --- --- ---
-| o | e | g | h | t |
+| o | ! | g | h | t |
  --- --- --- --- ---
     | s | e |
      --- ---
