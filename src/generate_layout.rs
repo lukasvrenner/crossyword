@@ -15,33 +15,60 @@ impl Word<'_> {
             let mut y_pos: isize = 0;
             let mut x_pos: isize = 0;
             let mut is_verticle: bool = false;
-            for placed_word in placed_words {
+            let mut next_word = PlacedWord {
+                word: self.word,
+                clue: self.clue,
+                is_verticle,
+                pos: [x_pos, y_pos],
+            };
+
+            'words: for placed_word in placed_words {
                 is_verticle = !placed_word.is_verticle;
                 if placed_word.is_verticle {
+                    // find index of matching letters 
                     for (letter_index, letter) in self.word.chars().enumerate() {
-                        x_pos = placed_word.pos[0] - letter_index as isize;
                         y_pos = match placed_word.word.find(letter) {
                             Some(index) => index as isize,
-                            None => break,
+                            None => continue,
+                        };
+                        x_pos = placed_word.pos[0] - letter_index as isize;
+                        next_word = PlacedWord {
+                            word: self.word,
+                            clue: self.clue,
+                            is_verticle,
+                            pos: [x_pos, y_pos],
+                        };
+
+                        // stop once match is found
+                        if !illegal_overlap(&next_word, placed_words) {
+                            break 'words;
                         }
                     }
                 } else {
+                    // find index of matching letters 
                     for (letter_index, letter) in self.word.chars().enumerate() {
-                        y_pos = placed_word.pos[1] - letter_index as isize;
                         x_pos = match placed_word.word.find(letter) {
                             Some(index) => index as isize,
-                            None => break,
+                            None => continue,
+                        };
+                        y_pos = placed_word.pos[1] - letter_index as isize;
+
+                        next_word = PlacedWord {
+                            word: self.word,
+                            clue: self.clue,
+                            is_verticle,
+                            pos: [x_pos, y_pos],
+                        };
+
+                        // stop once match is found
+                        if !illegal_overlap(&next_word, placed_words) {
+                            break 'words;
                         }
                     }
                 }
             }
-            let pos = [x_pos, y_pos];
-            let next_word = PlacedWord {
-                word: self.word,
-                clue: self.clue,
-                is_verticle,
-                pos,
-            };
+
+            // if no possible position
             if illegal_overlap(&next_word, placed_words) {
                 return None
             }
@@ -87,19 +114,20 @@ fn generate_layout<'a>(word_list: &'a [Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
     let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
     for word in word_list {
-        let new_word = word.calc_position(&placed_words)?;
-        placed_words.push(new_word);
+        let next_word = word.calc_position(&placed_words)?;
+        placed_words.push(next_word);
     }
     Some(placed_words)
 }
 
-// PROBABLY DOESN'T WORK
 fn illegal_overlap(
     next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>])
 -> bool {
     let mut illegal = false;
+
     if next_word.is_verticle {
         for placed_word in placed_words {
+            // if they're perpendicular
             if !placed_word.is_verticle {
                 illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
                     next_word.pos[0] - placed_word.pos[0]
@@ -117,6 +145,8 @@ fn illegal_overlap(
                         (next_word.pos[0] - placed_word.pos[0]) as usize
                         );
             } else {
+                // we don't need to compare letters
+                // because any same_direction overlap is illegal
                 illegal = 
                     next_word.pos[1] - placed_word.pos[1]
                     > next_word.word.len() as isize
@@ -130,6 +160,7 @@ fn illegal_overlap(
         }
     } else {
         for placed_word in placed_words {
+            // if they're perpendicular
             if placed_word.is_verticle {
                 illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
                     placed_word.pos[0] - next_word.pos[0]
@@ -147,6 +178,8 @@ fn illegal_overlap(
                         (placed_word.pos[0] - next_word.pos[0]) as usize
                         );
             } else {
+                // we don't need to compare letters
+                // because any same_direction overlap is illegal
                 illegal = 
                     next_word.pos[0] - placed_word.pos[0]
                     > next_word.word.len() as isize
@@ -231,6 +264,7 @@ mod tests {
     | s |       | r |
      ---         ---
 */
+        assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
 
         let vert_opposite_orientation_legal: &PlacedWord<'_> = 
             &PlacedWord {
@@ -256,6 +290,7 @@ mod tests {
     | a |
      ---
 */
+        assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
 
         let hori_opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
@@ -279,6 +314,8 @@ mod tests {
                 | r |
                  ---
 */
+        assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
+
         let hori_opposite_orientation_legal: &PlacedWord<'_> = 
             &PlacedWord {
                 word: "bit",
@@ -301,15 +338,11 @@ mod tests {
                 | r |
                  ---
 */
-        
-        assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
-        assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
-        assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
         assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
     }
 
     #[test]
-    fn position() {
+    fn calc_position() {
 /*
  --- --- ---     ---
 | c | a | t |   | b |
@@ -354,5 +387,11 @@ mod tests {
 | h |           | r |
  ---             ---
 */
+        let snaps: Word<'_> = 
+            Word {
+                word: "snaps",
+                clue: "breaks",
+            };
+        assert_eq!(snaps.calc_position(PLACED_WORDS), None);
     }
 }
