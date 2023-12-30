@@ -28,7 +28,7 @@ impl Word<'_> {
                     // find index of matching letters 
                     for (letter_index, letter) in self.word.chars().enumerate() {
                         y_pos = match placed_word.word.find(letter) {
-                            Some(index) => index as isize,
+                            Some(index) => index as isize + placed_word.pos[1],
                             None => continue,
                         };
                         x_pos = placed_word.pos[0] - letter_index as isize;
@@ -41,6 +41,7 @@ impl Word<'_> {
 
                         // stop once match is found
                         if !illegal_overlap(&next_word, placed_words) {
+                            println!("next word: {}; match: {}", self.word, placed_word.word);
                             break 'words;
                         }
                     }
@@ -48,7 +49,7 @@ impl Word<'_> {
                     // find index of matching letters 
                     for (letter_index, letter) in self.word.chars().enumerate() {
                         x_pos = match placed_word.word.find(letter) {
-                            Some(index) => index as isize,
+                            Some(index) => index as isize + placed_word.pos[0],
                             None => continue,
                         };
                         y_pos = placed_word.pos[1] - letter_index as isize;
@@ -62,6 +63,7 @@ impl Word<'_> {
 
                         // stop once match is found
                         if !illegal_overlap(&next_word, placed_words) {
+                            println!("next word: {}; match: {}", self.word, placed_word.word);
                             break 'words;
                         }
                     }
@@ -101,10 +103,11 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
 pub fn extract_layout<'a>(words: &'a [Word<'a>])
 -> Vec<PlacedWord<'a>> {
     let wrapped_layout = generate_layout(words);
-    match wrapped_layout {
-        Some(layout) => layout,
-        None => extract_layout(words)
-    }
+    // match wrapped_layout {
+    //     Some(layout) => layout,
+    //     None => extract_layout(words)
+    // }
+    wrapped_layout.unwrap()
 }
 
 /* we return an Option because
@@ -145,14 +148,14 @@ fn illegal_overlap(
                         (next_word.pos[0] - placed_word.pos[0]) as usize
                         );
             } else {
-                // we don't need to compare letters
-                // because any same_direction overlap is illegal
+                // any same-direction overlap is illegal
                 illegal = 
-                    next_word.pos[1] - placed_word.pos[1]
-                    > next_word.word.len() as isize
-                    &&
+                    (next_word.pos[1] - placed_word.pos[1]
+                    < next_word.word.len() as isize
+                    ||
                     placed_word.pos[1] - next_word.pos[1] 
-                    > placed_word.word.len() as isize;
+                    < placed_word.word.len() as isize)
+                    && placed_word.pos[0] == next_word.pos[0];
             }
             if illegal {
                 break;
@@ -162,7 +165,7 @@ fn illegal_overlap(
         for placed_word in placed_words {
             // if they're perpendicular
             if placed_word.is_verticle {
-                illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
+                illegal = placed_word.pos[0] - next_word.pos[0] >= 0 &&
                     placed_word.pos[0] - next_word.pos[0]
                     < next_word.word.len() as isize
                     &&
@@ -178,14 +181,14 @@ fn illegal_overlap(
                         (placed_word.pos[0] - next_word.pos[0]) as usize
                         );
             } else {
-                // we don't need to compare letters
-                // because any same_direction overlap is illegal
+                // any same-direction overlap is illegal
                 illegal = 
-                    next_word.pos[0] - placed_word.pos[0]
-                    > next_word.word.len() as isize
-                    &&
+                    (next_word.pos[0] - placed_word.pos[0]
+                    < next_word.word.len() as isize
+                    ||
                     placed_word.pos[0] - next_word.pos[0] 
-                    > placed_word.word.len() as isize;
+                    < placed_word.word.len() as isize)
+                    && placed_word.pos[1] == next_word.pos[1];
             }
             if illegal {
                 break;
@@ -221,7 +224,7 @@ mod tests {
             word: "batter",
             clue: "hit repeatedly",
             is_verticle: true,
-            pos: [5, 0],
+            pos: [4, 0],
         }
 
     ];
@@ -241,7 +244,7 @@ mod tests {
                  ---
 */
     #[test]
-    fn overlap() {
+    fn illegal() {
         let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
             &PlacedWord {
                 word: "assess",
@@ -358,20 +361,20 @@ mod tests {
                 | r |
                  ---
 */
-        let crouch: Word<'_> = 
+        let vertical: Word<'_> = 
             Word {
                 word: "crouch",
                 clue: "kneel",
             };
 
-        let crouch_placed: PlacedWord<'_> = 
+        let vertical_placed: PlacedWord<'_> = 
             PlacedWord {
                 word: "crouch",
                 clue: "kneel",
                 is_verticle: true,
                 pos: [0, 0],
             };
-        assert_eq!(crouch.calc_position(PLACED_WORDS), Some(crouch_placed));
+        assert_eq!(vertical.calc_position(PLACED_WORDS), Some(vertical_placed));
 /*
  --- --- ---     ---
 | c | a | t |   | b |
@@ -387,11 +390,40 @@ mod tests {
 | h |           | r |
  ---             ---
 */
-        let snaps: Word<'_> = 
+        let no_possible_pos: Word<'_> = 
             Word {
                 word: "snaps",
                 clue: "breaks",
             };
-        assert_eq!(snaps.calc_position(PLACED_WORDS), None);
+        assert_eq!(no_possible_pos.calc_position(PLACED_WORDS), None);
+
+        let horizontal: Word<'_> = 
+            Word {
+                word: "better",
+                clue: "superior",
+            };
+        let horizontal_placed: PlacedWord<'_> = 
+            PlacedWord {
+                word: "better",
+                clue: "superior",
+                is_verticle: false,
+                pos: [1, 3],
+            };
+        assert_eq!(horizontal.calc_position(PLACED_WORDS), Some(horizontal_placed));
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+        | i |   | a | 
+ --- --- --- --- ---
+| o | u | g | h | t |
+ --- --- --- --- --- --- ---
+    | b | e | t | t | e | r |
+     --- --- --- --- --- ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
+*/
     }
 }
