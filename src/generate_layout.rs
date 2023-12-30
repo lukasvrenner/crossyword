@@ -41,7 +41,6 @@ impl Word<'_> {
 
                         // stop once match is found
                         if !illegal_overlap(&next_word, placed_words) {
-                            println!("next word: {}; match: {}", self.word, placed_word.word);
                             break 'words;
                         }
                     }
@@ -63,7 +62,6 @@ impl Word<'_> {
 
                         // stop once match is found
                         if !illegal_overlap(&next_word, placed_words) {
-                            println!("next word: {}; match: {}", self.word, placed_word.word);
                             break 'words;
                         }
                     }
@@ -342,6 +340,31 @@ mod tests {
                  ---
 */
         assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
+
+        let hori_same_orientation_illegal: &PlacedWord<'_> = 
+            &PlacedWord {
+                word: "its",
+                clue: "posessive case of it",
+                is_verticle: false,
+                pos: [3, 2],
+            };
+/*
+ --- --- ---     ---
+| c | a | t |   | b |
+ --- --- ---     ---
+        | i |   | a | 
+ --- --- --- --- --- ---
+| o | u | g | i | t | s |
+ --- --- --- --- --- ---
+        | e |   | t |
+         ---     ---
+        | r |   | e |
+         ---     ---
+                | r |
+                 ---
+*/
+        assert!(illegal_overlap(hori_same_orientation_illegal, PLACED_WORDS));
+
     }
 
     #[test]
