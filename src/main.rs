@@ -18,8 +18,8 @@ fn main() -> std::io::Result<()> {
             clue: split_item[1],
         })
     }
-    println!("{:?}", words[0]);
     let puzzle = extract_layout(&words);
+    println!("{:?}", puzzle);
 
     Ok(())
 }
