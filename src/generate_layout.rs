@@ -9,78 +9,59 @@ pub struct Word<'a> {
 }
 
 impl Word<'_> {
-    fn calc_position<'a>(
-        &'a self, placed_words: &[PlacedWord<'a>])
-        -> Option<PlacedWord<'a>> {
-            let mut y_pos: isize = 0;
-            let mut x_pos: isize = 0;
-            let mut is_verticle: bool = false;
-            let mut next_word = PlacedWord {
-                word: self.word,
-                clue: self.clue,
-                is_verticle,
-                pos: [x_pos, y_pos],
-            };
+    fn place<'a>(
+        &'a self, placed_words: &[PlacedWord<'a>]
+        ) -> Option<PlacedWord<'a>> {
+        for placed_word in placed_words {
+            let is_vertical = !placed_word.is_vertical;
 
-            'words: for placed_word in placed_words {
-                is_verticle = !placed_word.is_verticle;
-                if placed_word.is_verticle {
-                    // find index of matching letters 
-                    for (letter_index, letter) in self.word.chars().enumerate() {
-                        y_pos = match placed_word.word.find(letter) {
-                            Some(index) => index as isize + placed_word.pos[1],
-                            None => continue,
-                        };
-                        x_pos = placed_word.pos[0] - letter_index as isize;
-                        next_word = PlacedWord {
-                            word: self.word,
-                            clue: self.clue,
-                            is_verticle,
-                            pos: [x_pos, y_pos],
-                        };
+            for (index, letter) in self.word.char_indices() {
+                let dependant_axis_pos = match placed_word.word.find(letter) {
+                    Some(position) => {
+                        position as isize + placed_word.pos[!is_vertical as usize]
+                    },
+                    None => continue,
+                };
 
-                        // stop once match is found
-                        if !illegal_overlap(&next_word, placed_words) {
-                            break 'words;
-                        }
-                    }
+                let independant_axis_pos = {
+                    placed_word.pos[is_vertical as usize]  - index as isize
+                };
+                let pos: [isize; 2];
+                if is_vertical {
+                    pos = [dependant_axis_pos, independant_axis_pos];
                 } else {
-                    // find index of matching letters 
-                    for (letter_index, letter) in self.word.chars().enumerate() {
-                        x_pos = match placed_word.word.find(letter) {
-                            Some(index) => index as isize + placed_word.pos[0],
-                            None => continue,
-                        };
-                        y_pos = placed_word.pos[1] - letter_index as isize;
-
-                        next_word = PlacedWord {
-                            word: self.word,
-                            clue: self.clue,
-                            is_verticle,
-                            pos: [x_pos, y_pos],
-                        };
-
-                        // stop once match is found
-                        if !illegal_overlap(&next_word, placed_words) {
-                            break 'words;
-                        }
-                    }
+                    pos = [independant_axis_pos, dependant_axis_pos];
+                }
+                let next_word = PlacedWord {
+                    word: self.word,
+                    clue: self.clue,
+                    is_vertical,
+                    pos,
+                };
+                if !illegal_overlap(&next_word, placed_words) {
+                    return Some(next_word);
                 }
             }
-
-            // if no possible position
-            if illegal_overlap(&next_word, placed_words) {
-                return None
-            }
-            Some(next_word)
         }
+        if placed_words.is_empty() {
+            let next_word = PlacedWord {
+                word: self.word,
+                clue: self.clue,
+                is_vertical: false,
+                pos: [0, 0],
+            };
+            return Some(next_word);
+        }
+        None
+    }
 }
+
 
 #[derive(Debug, PartialEq)]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     clue: &'a str,
-    pub is_verticle: bool,
+    pub is_vertical: bool,
     pub pos: [isize; 2],
 }
 
@@ -115,21 +96,21 @@ fn generate_layout<'a>(word_list: &'a [Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
     let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
     for word in word_list {
-        let next_word = word.calc_position(&placed_words)?;
+        let next_word = word.place(&placed_words)?;
         placed_words.push(next_word);
     }
     Some(placed_words)
 }
 
 fn illegal_overlap(
-    next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>])
--> bool {
+    next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>]
+    ) -> bool {
     let mut illegal = false;
 
-    if next_word.is_verticle {
+    if next_word.is_vertical {
         for placed_word in placed_words {
             // if they're perpendicular
-            if !placed_word.is_verticle {
+            if !placed_word.is_vertical {
                 illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
                     next_word.pos[0] - placed_word.pos[0]
                     < placed_word.word.len() as isize
@@ -162,7 +143,7 @@ fn illegal_overlap(
     } else {
         for placed_word in placed_words {
             // if they're perpendicular
-            if placed_word.is_verticle {
+            if placed_word.is_vertical {
                 illegal = placed_word.pos[0] - next_word.pos[0] >= 0 &&
                     placed_word.pos[0] - next_word.pos[0]
                     < next_word.word.len() as isize
@@ -203,25 +184,25 @@ mod tests {
         PlacedWord {
             word: "cat",
             clue: "an animal of group cat",
-            is_verticle: false,
+            is_vertical: false,
             pos: [0, 0],
         },
         PlacedWord {
             word: "tiger",
             clue: "a wild species of cat",
-            is_verticle: true,
+            is_vertical: true,
             pos: [2, 0],
         },
         PlacedWord {
             word: "ought",
             clue: "should",
-            is_verticle: false,
+            is_vertical: false,
             pos: [0, 2],
         },
         PlacedWord {
             word: "batter",
             clue: "hit repeatedly",
-            is_verticle: true,
+            is_vertical: true,
             pos: [4, 0],
         }
 
@@ -247,7 +228,7 @@ mod tests {
             &PlacedWord {
                 word: "assess",
                 clue: "to determine information from",
-                is_verticle: true,
+                is_vertical: true,
                 pos: [1, 0],
             };
 /*
@@ -271,7 +252,7 @@ mod tests {
             &PlacedWord {
                 word: "alumina",
                 clue: "aluminium oxide",
-                is_verticle: true,
+                is_vertical: true,
                 pos: [1, 0],
             };
 /*
@@ -297,7 +278,7 @@ mod tests {
             &PlacedWord {
                 word: "bitter",
                 clue: "having a sharp, pungent taste or smell",
-                is_verticle: true,
+                is_vertical: true,
                 pos: [1, 0],
             };
 /*
@@ -321,7 +302,7 @@ mod tests {
             &PlacedWord {
                 word: "bit",
                 clue: "small amount",
-                is_verticle: false,
+                is_vertical: false,
                 pos: [1, 1],
             };
 /*
@@ -345,7 +326,7 @@ mod tests {
             &PlacedWord {
                 word: "its",
                 clue: "posessive case of it",
-                is_verticle: false,
+                is_vertical: false,
                 pos: [3, 2],
             };
 /*
@@ -394,10 +375,10 @@ mod tests {
             PlacedWord {
                 word: "crouch",
                 clue: "kneel",
-                is_verticle: true,
+                is_vertical: true,
                 pos: [0, 0],
             };
-        assert_eq!(vertical.calc_position(PLACED_WORDS), Some(vertical_placed));
+        assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
 /*
  --- --- ---     ---
 | c | a | t |   | b |
@@ -418,7 +399,7 @@ mod tests {
                 word: "snaps",
                 clue: "breaks",
             };
-        assert_eq!(no_possible_pos.calc_position(PLACED_WORDS), None);
+        assert_eq!(no_possible_pos.place(PLACED_WORDS), None);
 
         let horizontal: Word<'_> = 
             Word {
@@ -429,10 +410,10 @@ mod tests {
             PlacedWord {
                 word: "better",
                 clue: "superior",
-                is_verticle: false,
+                is_vertical: false,
                 pos: [1, 3],
             };
-        assert_eq!(horizontal.calc_position(PLACED_WORDS), Some(horizontal_placed));
+        assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
 /*
  --- --- ---     ---
 | c | a | t |   | b |
