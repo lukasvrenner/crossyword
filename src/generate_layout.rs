@@ -2,10 +2,17 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
-#[derive(Debug)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct PlacedWord<'a> {
+    pub word: &'a str,
+    clue: &'a str,
+    pub is_vertical: bool,
+    pub pos: [isize; 2],
 }
 
 impl Word<'_> {
@@ -58,14 +65,6 @@ impl Word<'_> {
 }
 
 
-#[derive(Debug, PartialEq)]
-pub struct PlacedWord<'a> {
-    pub word: &'a str,
-    clue: &'a str,
-    pub is_vertical: bool,
-    pub pos: [isize; 2],
-}
-
 // takes ownership because original list is no longer needed
 pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     let mut rng = thread_rng();
@@ -79,7 +78,9 @@ pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
     random_words
 }
 
-// repeats until a sucessful layout is created
+// currently only creates one layout,
+// and panics if it fails.
+// this will be fixed in the future.
 pub fn extract_layout<'a>(words: &'a [Word<'a>])
 -> Vec<PlacedWord<'a>> {
     let wrapped_layout = generate_layout(words);
@@ -91,8 +92,8 @@ pub fn extract_layout<'a>(words: &'a [Word<'a>])
 }
 
 /* we return an Option because
- *  we do the same thing regardless
- *  of the type of error*/
+ * we do the same thing regardless
+ * of the type of error*/
 fn generate_layout<'a>(word_list: &'a [Word<'a>])
 -> Option<Vec<PlacedWord<'a>>> {
     let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
@@ -120,6 +121,7 @@ fn illegal_overlap(
                 vertical_word = placed_word;
                 horizontal_word = next_word;
             }
+
             illegal = 
                 vertical_word.pos[0] >= horizontal_word.pos[0] &&
                 vertical_word.pos[0] - horizontal_word.pos[0]
@@ -148,6 +150,7 @@ fn illegal_overlap(
                  < placed_word.word.len() as isize)
                 && placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
         }
+
         if illegal {
             break;
         }
