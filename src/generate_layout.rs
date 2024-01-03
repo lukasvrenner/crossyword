@@ -33,12 +33,19 @@ impl Word<'_> {
                 let independant_axis_pos = {
                     placed_word.pos[is_vertical as usize]  - index as isize
                 };
-                let pos: [isize; 2];
-                if is_vertical {
-                    pos = [dependant_axis_pos, independant_axis_pos];
+                // let pos: [isize; 2];
+                // if is_vertical {
+                //     pos = [dependant_axis_pos, independant_axis_pos];
+                // } else {
+                //     pos = [independant_axis_pos, dependant_axis_pos];
+                // }
+                let pos: [isize; 2] = if is_vertical {
+                    [dependant_axis_pos, independant_axis_pos]
                 } else {
-                    pos = [independant_axis_pos, dependant_axis_pos];
-                }
+                    [independant_axis_pos, dependant_axis_pos]
+                };
+
+                
                 let next_word = PlacedWord {
                     word: self.word,
                     clue: self.clue,
