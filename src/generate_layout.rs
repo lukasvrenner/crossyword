@@ -38,6 +38,7 @@ impl Word<'_> {
                     is_vertical,
                     pos,
                 };
+
                 if !illegal_overlap(&next_word, placed_words) {
                     return Some(next_word);
                 }
@@ -107,73 +108,51 @@ fn illegal_overlap(
     ) -> bool {
     let mut illegal = false;
 
-    if next_word.is_vertical {
-        for placed_word in placed_words {
-            // if they're perpendicular
-            if !placed_word.is_vertical {
-                illegal = next_word.pos[0] - placed_word.pos[0] >= 0 &&
-                    next_word.pos[0] - placed_word.pos[0]
-                    < placed_word.word.len() as isize
-                    &&
-                    placed_word.pos[1] - next_word.pos[1] >= 0 &&
-                    placed_word.pos[1] - next_word.pos[1]
-                    < next_word.word.len() as isize
-                    &&
-                    next_word.word.chars().nth(
-                        (placed_word.pos[1] - next_word.pos[1]) as usize
-                        )
-                    !=
-                    placed_word.word.chars().nth(
-                        (next_word.pos[0] - placed_word.pos[0]) as usize
-                        );
+    for placed_word in placed_words {
+        // if they're perpendicular
+        if placed_word.is_vertical ^ next_word.is_vertical {
+            let vertical_word: &PlacedWord<'_>;
+            let horizontal_word: &PlacedWord<'_>;
+            if next_word.is_vertical {
+                vertical_word = next_word;
+                horizontal_word = placed_word;
             } else {
-                // any same-direction overlap is illegal
-                illegal = 
-                    (next_word.pos[1] - placed_word.pos[1]
-                    < next_word.word.len() as isize
-                    ||
-                    placed_word.pos[1] - next_word.pos[1] 
-                    < placed_word.word.len() as isize)
-                    && placed_word.pos[0] == next_word.pos[0];
+                vertical_word = placed_word;
+                horizontal_word = next_word;
             }
-            if illegal {
-                break;
-            }
+            illegal = 
+                vertical_word.pos[0] >= horizontal_word.pos[0] &&
+                vertical_word.pos[0] - horizontal_word.pos[0]
+                < horizontal_word.word.len() as isize
+                &&
+                horizontal_word.pos[1] >= vertical_word.pos[1] &&
+                horizontal_word.pos[1] - vertical_word.pos[1]
+                < vertical_word.word.len() as isize
+                &&
+                vertical_word.word.chars().nth(
+                    (horizontal_word.pos[1] - vertical_word.pos[1]) as usize
+                    )
+                !=
+                horizontal_word.word.chars().nth(
+                    (vertical_word.pos[0] - horizontal_word.pos[0]) as usize
+                    );
+        } else {
+            // any same-direction overlap is illegal
+            let is_vertical = next_word.is_vertical as usize;
+            let is_horizontal = !next_word.is_vertical as usize;
+            illegal = 
+                (next_word.pos[is_vertical] - placed_word.pos[is_vertical]
+                 < next_word.word.len() as isize
+                 ||
+                 placed_word.pos[is_vertical] - next_word.pos[is_vertical] 
+                 < placed_word.word.len() as isize)
+                && placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
         }
-    } else {
-        for placed_word in placed_words {
-            // if they're perpendicular
-            if placed_word.is_vertical {
-                illegal = placed_word.pos[0] - next_word.pos[0] >= 0 &&
-                    placed_word.pos[0] - next_word.pos[0]
-                    < next_word.word.len() as isize
-                    &&
-                    next_word.pos[1] - placed_word.pos[1] >= 0 &&
-                    next_word.pos[1] - placed_word.pos[1]
-                    < placed_word.word.len() as isize
-                    &&
-                    placed_word.word.chars().nth(
-                        (next_word.pos[1] - placed_word.pos[1]) as usize
-                        )
-                    !=
-                    next_word.word.chars().nth(
-                        (placed_word.pos[0] - next_word.pos[0]) as usize
-                        );
-            } else {
-                // any same-direction overlap is illegal
-                illegal = 
-                    (next_word.pos[0] - placed_word.pos[0]
-                    < next_word.word.len() as isize
-                    ||
-                    placed_word.pos[0] - next_word.pos[0] 
-                    < placed_word.word.len() as isize)
-                    && placed_word.pos[1] == next_word.pos[1];
-            }
-            if illegal {
-                break;
-            }
+        if illegal {
+            break;
         }
     }
+
     illegal
 }
 
@@ -335,7 +314,7 @@ mod tests {
  --- --- ---     ---
         | i |   | a | 
  --- --- --- --- --- ---
-| o | u | g | i | t | s |
+| o | u | g | ! | t | s |
  --- --- --- --- --- ---
         | e |   | t |
          ---     ---
