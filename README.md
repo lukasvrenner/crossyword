@@ -17,5 +17,4 @@
 - For example: `alumina.Aluminium oxide`   
 
 ## Contributing
-- please use proper style
-- at least try to document your code
+-
