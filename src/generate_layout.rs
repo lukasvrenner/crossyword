@@ -77,7 +77,7 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
-pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
+pub fn new_puzzle<'a>(word_list: &'a [Word])
 -> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
@@ -98,7 +98,7 @@ pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
     best_puzzle
 }
 
-fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
+fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     let mut rng = thread_rng();
     let random_indices = 
         rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
