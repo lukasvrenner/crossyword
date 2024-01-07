@@ -17,7 +17,7 @@ fn main() -> std::io::Result<()> {
             clue: split_item[1],
         })
     }
-    let puzzle = new_puzzle(&formatted_words);
+    let puzzle = new_puzzle(&formatted_words).unwrap();
     println!("{:?}", puzzle);
 
     Ok(())

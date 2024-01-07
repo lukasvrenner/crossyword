@@ -68,15 +68,16 @@ impl Word<'_> {
 
 type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
-trait GetOverLaps {
-    fn get_total_overlaps(&self) -> u8;
+trait GetOverlaps {
+    fn get_overlaps(&self) -> u8;
 }
 
-impl GetOverLaps for Puzzle<'_> {
-    fn get_total_overlaps(&self) -> u8 {
+impl GetOverlaps for Puzzle<'_> {
+    fn get_overlaps(&self) -> u8 {
         todo!();
     }
 }
+
 // takes ownership because original list is no longer needed
 pub fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
     let mut rng = thread_rng();
@@ -90,20 +91,16 @@ pub fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-
-
-// currently only creates one layout,
-// and panics if it fails.
-// this will be fixed in the future.
 pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
--> Puzzle<'a> {
+-> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
+
     for _ in 0..100 {
         let words = get_random_words(word_list);
         match generate_layout(words) {
             Some(puzzle) => {
-                let overlaps = puzzle.get_total_overlaps();
+                let overlaps = puzzle.get_overlaps();
                 if overlaps > most_ovelaps {
                     most_ovelaps = overlaps;
                     best_puzzle = Some(puzzle);
@@ -112,12 +109,7 @@ pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
             None => continue,
         }
     }
-
-    // match wrapped_layout {
-    //     Some(layout) => layout,
-    //     None => extract_layout(words)
-    // }
-    best_puzzle.unwrap()
+    best_puzzle
 }
 
 
