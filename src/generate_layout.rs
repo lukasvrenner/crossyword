@@ -77,6 +77,19 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
+pub fn format_words(all_words: &str) -> Vec<Word> {
+    // let seperated_words: Vec<&str> = all_words.lines().collect();
+    let mut formatted_words: Vec<Word> = Vec::new();
+    for word in all_words.lines() {
+        let split_word: Vec<&str> = word.split('.').collect();
+        formatted_words.push(Word {
+            word: split_word[0],
+            clue: split_word[1],
+        })
+    }
+    formatted_words
+}
+
 pub fn new_puzzle<'a>(word_list: &'a [Word])
 -> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
@@ -110,10 +123,10 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-fn generate_layout<'a>(word_list: Vec<&'a Word<'a>>)
+fn generate_layout<'a>(words: Vec<&'a Word<'a>>)
 -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
-    for word in word_list {
+    for word in words {
         placed_words.push(word.place(&placed_words)?);
     }
     Some(placed_words)
