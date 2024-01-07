@@ -2,7 +2,6 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
-#[derive(Clone, Copy)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
