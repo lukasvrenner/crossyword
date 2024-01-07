@@ -7,18 +7,17 @@ fn main() -> std::io::Result<()> {
     let wordfile = fs::read_to_string("./words.txt")?;
 
     let all_words: Vec<&str> = wordfile.lines().collect();
-    let word_list = get_random_words(all_words); // takes ownership of all_words
-    let mut words: Vec<Word> = Vec::new();
+    let mut formatted_words: Vec<Word> = Vec::new();
 
     // format words_list
-    for item in word_list {
+    for item in all_words {
         let split_item: Vec<&str> = item.split('.').collect();
-        words.push(Word {
+        formatted_words.push(Word {
             word: split_item[0],
             clue: split_item[1],
         })
     }
-    let puzzle = extract_layout(&words);
+    let puzzle = new_puzzle(&formatted_words);
     println!("{:?}", puzzle);
 
     Ok(())

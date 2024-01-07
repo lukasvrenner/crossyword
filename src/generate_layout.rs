@@ -2,6 +2,7 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
+#[derive(Clone, Copy)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -33,18 +34,12 @@ impl Word<'_> {
                 let independant_axis_pos = {
                     placed_word.pos[is_vertical as usize]  - index as isize
                 };
-                // let pos: [isize; 2];
-                // if is_vertical {
-                //     pos = [dependant_axis_pos, independant_axis_pos];
-                // } else {
-                //     pos = [independant_axis_pos, dependant_axis_pos];
-                // }
+
                 let pos: [isize; 2] = if is_vertical {
                     [dependant_axis_pos, independant_axis_pos]
                 } else {
                     [independant_axis_pos, dependant_axis_pos]
                 };
-
                 
                 let next_word = PlacedWord {
                     word: self.word,
@@ -71,42 +66,69 @@ impl Word<'_> {
     }
 }
 
+type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
+trait GetOverLaps {
+    fn get_total_overlaps(&self) -> u8;
+}
+
+impl GetOverLaps for Puzzle<'_> {
+    fn get_total_overlaps(&self) -> u8 {
+        todo!();
+    }
+}
 // takes ownership because original list is no longer needed
-pub fn get_random_words(word_list: Vec<&str>) -> Vec<&str> {
+pub fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
     let mut rng = thread_rng();
     let random_indices = 
         rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
-    let mut random_words: Vec<&str> = Vec::new();
+    let mut random_words: Vec<&'a Word> = Vec::new();
 
     for index in random_indices {
-        random_words.push(word_list[index]);
+        random_words.push(&word_list[index]);
     }
     random_words
 }
 
+
+
 // currently only creates one layout,
 // and panics if it fails.
 // this will be fixed in the future.
-pub fn extract_layout<'a>(words: &'a [Word<'a>])
--> Vec<PlacedWord<'a>> {
-    let wrapped_layout = generate_layout(words);
+pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
+-> Puzzle<'a> {
+    let mut best_puzzle: Option<Puzzle> = None;
+    let mut most_ovelaps: u8 = 0;
+    for _ in 0..100 {
+        let words = get_random_words(word_list);
+        match generate_layout(words) {
+            Some(puzzle) => {
+                let overlaps = puzzle.get_total_overlaps();
+                if overlaps > most_ovelaps {
+                    most_ovelaps = overlaps;
+                    best_puzzle = Some(puzzle);
+                }
+            },
+            None => continue,
+        }
+    }
+
     // match wrapped_layout {
     //     Some(layout) => layout,
     //     None => extract_layout(words)
     // }
-    wrapped_layout.unwrap()
+    best_puzzle.unwrap()
 }
+
 
 /* we return an Option because
  * we do the same thing regardless
  * of the type of error*/
-fn generate_layout<'a>(word_list: &'a [Word<'a>])
--> Option<Vec<PlacedWord<'a>>> {
-    let mut placed_words: Vec<PlacedWord<'a>> = Vec::new();
+fn generate_layout<'a>(word_list: Vec<&'a Word<'a>>)
+-> Option<Puzzle<'a>> {
+    let mut placed_words: Puzzle = Vec::new();
     for word in word_list {
-        let next_word = word.place(&placed_words)?;
-        placed_words.push(next_word);
+        placed_words.push(word.place(&placed_words)?);
     }
     Some(placed_words)
 }
