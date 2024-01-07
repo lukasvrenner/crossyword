@@ -78,19 +78,6 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
-// takes ownership because original list is no longer needed
-pub fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
-    let mut rng = thread_rng();
-    let random_indices = 
-        rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
-    let mut random_words: Vec<&'a Word> = Vec::new();
-
-    for index in random_indices {
-        random_words.push(&word_list[index]);
-    }
-    random_words
-}
-
 pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
 -> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
@@ -112,10 +99,18 @@ pub fn new_puzzle<'a>(word_list: &'a Vec<Word>)
     best_puzzle
 }
 
+fn get_random_words<'a>(word_list: &'a Vec<Word>) -> Vec<&'a Word<'a>> {
+    let mut rng = thread_rng();
+    let random_indices = 
+        rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
+    let mut random_words: Vec<&'a Word> = Vec::new();
 
-/* we return an Option because
- * we do the same thing regardless
- * of the type of error*/
+    for index in random_indices {
+        random_words.push(&word_list[index]);
+    }
+    random_words
+}
+
 fn generate_layout<'a>(word_list: Vec<&'a Word<'a>>)
 -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
@@ -133,15 +128,13 @@ fn illegal_overlap(
     for placed_word in placed_words {
         // if they're perpendicular
         if placed_word.is_vertical ^ next_word.is_vertical {
-            let vertical_word: &PlacedWord<'_>;
-            let horizontal_word: &PlacedWord<'_>;
-            if next_word.is_vertical {
-                vertical_word = next_word;
-                horizontal_word = placed_word;
-            } else {
-                vertical_word = placed_word;
-                horizontal_word = next_word;
-            }
+
+            let (vertical_word, horizontal_word) =
+                if next_word.is_vertical {
+                    (next_word, placed_word)
+                } else {
+                    (placed_word, next_word)
+                };
 
             illegal = 
                 vertical_word.pos[0] >= horizontal_word.pos[0] &&
