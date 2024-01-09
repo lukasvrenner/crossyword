@@ -77,17 +77,17 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
-pub fn format_words(all_words: &str) -> Vec<Word> {
-    // let seperated_words: Vec<&str> = all_words.lines().collect();
+
+pub fn format_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
     for word in all_words.lines() {
-        let split_word: Vec<&str> = word.split('.').collect();
+        let mut split_word = word.split('.');
         formatted_words.push(Word {
-            word: split_word[0],
-            clue: split_word[1],
+            word: split_word.next()?,
+            clue: split_word.next()?,
         })
     }
-    formatted_words
+    Some(formatted_words)
 }
 
 pub fn new_puzzle<'a>(word_list: &'a [Word])
