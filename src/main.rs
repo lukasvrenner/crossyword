@@ -6,14 +6,14 @@ use crate::generate_layout::*;
 fn main() {
     let words_file = "./words.txt";
 
-    // display error to window once GUI is created
+    // note: display error to window once GUI is created
     let unformatted_words = fs::read_to_string(words_file)
         .unwrap_or_else(|err| {
             eprintln!("could not read {}: {}", words_file, err);
             std::process::exit(1);
     });
 
-    // display error to window once GUI is created
+    // note: display error to window once GUI is created
     let formatted_words = format_words(&unformatted_words)
         .unwrap_or_else(||{
             eprintln!("could not parse {}", words_file);
