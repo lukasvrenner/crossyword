@@ -14,4 +14,4 @@
 - For example: `alumina.Aluminium oxide`
 
 ## 🧐found a bug?
--create an issue [here](https://github.com/lukasvrenner/crossyword/issues)
+- create an issue [here](https://github.com/lukasvrenner/crossyword/issues)
