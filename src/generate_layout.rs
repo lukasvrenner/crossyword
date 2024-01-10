@@ -239,21 +239,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-    | s | i |   | a |
- --- --- --- --- ---
-| o | ! | g | h | t |
- --- --- --- --- ---
-    | e | e |   | t |
-     --- ---     ---
-    | s | r |   | e |
-     --- ---     ---
-    | s |       | r |
-     ---         ---
-*/
+
         assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
 
         let vert_opposite_orientation_legal: &PlacedWord<'_> = 
@@ -263,23 +249,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-    | l | i |   | a |
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-    | m | e |   | t |
-     --- ---     ---
-    | i | r |   | e |
-     --- ---     ---
-    | n |       | r |
-     ---         --- 
-    | a |
-     ---
-*/
+
         assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
 
         let hori_opposite_orientation_illegal: &PlacedWord<'_> = 
@@ -289,21 +259,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- --- --- --- --- ---
-    | b | i | t | ! | e | r |
- --- --- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
 
         let hori_opposite_orientation_legal: &PlacedWord<'_> = 
@@ -313,21 +269,7 @@ mod tests {
                 is_vertical: false,
                 pos: [1, 1],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- --- --- ---
-    | b | i | t | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
 
         let hori_same_orientation_illegal: &PlacedWord<'_> = 
@@ -337,42 +279,13 @@ mod tests {
                 is_vertical: false,
                 pos: [3, 2],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- --- ---
-| o | u | g | ! | t | s |
- --- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(illegal_overlap(hori_same_orientation_illegal, PLACED_WORDS));
 
     }
 
     #[test]
     fn calc_position() {
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
         let vertical: Word<'_> = 
             Word {
                 word: "crouch",
@@ -387,21 +300,7 @@ mod tests {
                 pos: [0, 0],
             };
         assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-| r |   | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-| u |   | e |   | t |
- ---     ---     ---
-| c |   | r |   | e |
- ---     ---     ---
-| h |           | r |
- ---             ---
-*/
+
         let no_possible_pos: Word<'_> = 
             Word {
                 word: "snaps",
@@ -422,20 +321,5 @@ mod tests {
                 pos: [1, 3],
             };
         assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- --- --- ---
-    | b | e | t | t | e | r |
-     --- --- --- --- --- ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
     }
 }
