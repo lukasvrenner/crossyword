@@ -2,6 +2,7 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
+#[derive(PartialEq, Debug)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -109,7 +110,7 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
-pub fn format_words(all_words: &str) -> Option<Vec<Word>> {
+pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
     for word in all_words.lines() {
         let mut split_word = word.split('.');
@@ -128,7 +129,7 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
 
     for _ in 0..1000 {
         let words = get_random_words(word_list);
-        match generate_layout(words) {
+        match generate_layout(&words) {
             Some(puzzle) => {
                 let overlaps = puzzle.total_overlaps();
                 if overlaps > most_ovelaps {
@@ -154,7 +155,7 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-fn generate_layout<'a>(words: Vec<&'a Word<'a>>)
+fn generate_layout<'a>(words: &[&'a Word<'a>])
 -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
     for word in words {
@@ -213,6 +214,26 @@ fn illegal_overlap(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const WORDS: &[Word<'_>] = &[
+        Word {
+            word: "cat",
+            clue: "an animal of group cat",
+        },
+        Word {
+            word: "tiger",
+            clue: "a wild species of cat",
+        },
+        Word {
+            word: "ought",
+            clue: "should",
+        },
+        Word {
+            word: "batter",
+            clue: "hit repeatedly",
+        }
+    ];
+
     const PLACED_WORDS: &[PlacedWord<'_>] = &[
         PlacedWord {
             word: "cat",
@@ -255,6 +276,25 @@ mod tests {
                 | r |
                  ---
 */
+
+    #[test]
+    fn parse() {
+        let unparsed = 
+"cat.an animal of group cat
+tiger.a wild species of cat
+ought.should
+batter.hit repeatedly";
+
+        assert_eq!(WORDS, parse_words(unparsed).unwrap());
+    }
+
+    #[test]
+    fn word_overlaps_other_word() {
+        assert!(PLACED_WORDS[1].overlaps(&PLACED_WORDS[2]));
+        assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[3]));
+        assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[2]));
+    }
+
     #[test]
     fn illegal() {
         let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
