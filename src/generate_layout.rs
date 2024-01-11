@@ -10,10 +10,12 @@ pub struct Word<'a> {
 #[derive(Debug, PartialEq)]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
-    clue: &'a str,
+    pub clue: &'a str,
     pub is_vertical: bool,
     pub pos: [isize; 2],
 }
+
+type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
     fn place<'a>(
@@ -65,18 +67,47 @@ impl Word<'_> {
     }
 }
 
-type Puzzle<'a> = Vec<PlacedWord<'a>>;
+impl PlacedWord<'_> {
+    fn overlaps(&self, word: &PlacedWord) -> bool {
+        let (vertical_word, horizontal_word) = if self.is_vertical {
+            (self, word)
+        } else {
+            (word, self)
+        };
+        vertical_word.pos[0] >= horizontal_word.pos[0] &&
+            vertical_word.pos[0] - horizontal_word.pos[0]
+            < horizontal_word.word.len() as isize
+            &&
+            horizontal_word.pos[1] >= vertical_word.pos[1] &&
+            horizontal_word.pos[1] - vertical_word.pos[1]
+            < vertical_word.word.len() as isize
+    }
 
-trait GetOverlaps {
-    fn get_overlaps(&self) -> u8;
-}
-
-impl GetOverlaps for Puzzle<'_> {
-    fn get_overlaps(&self) -> u8 {
-        todo!();
+    fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> u8 {
+        let mut overlaps: u8 = 0;
+        for word in placed_words {
+            if self.is_vertical ^ word.is_vertical {
+                overlaps += self.overlaps(word) as u8;
+            }
+        }
+        overlaps
     }
 }
 
+trait GetOverlaps {
+    fn total_overlaps(&self) -> u8;
+}
+
+impl GetOverlaps for Puzzle<'_> {
+    fn total_overlaps(&self) -> u8 {
+        let mut double_total_overlaps = 0;
+        for word in self {
+            double_total_overlaps += word.number_of_overlaps(self);
+        }
+
+        double_total_overlaps / 2
+    }
+}
 
 pub fn format_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
@@ -95,11 +126,11 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
-    for _ in 0..100 {
+    for _ in 0..1000 {
         let words = get_random_words(word_list);
         match generate_layout(words) {
             Some(puzzle) => {
-                let overlaps = puzzle.get_overlaps();
+                let overlaps = puzzle.total_overlaps();
                 if overlaps > most_ovelaps {
                     most_ovelaps = overlaps;
                     best_puzzle = Some(puzzle);
@@ -149,13 +180,7 @@ fn illegal_overlap(
                 };
 
             illegal = 
-                vertical_word.pos[0] >= horizontal_word.pos[0] &&
-                vertical_word.pos[0] - horizontal_word.pos[0]
-                < horizontal_word.word.len() as isize
-                &&
-                horizontal_word.pos[1] >= vertical_word.pos[1] &&
-                horizontal_word.pos[1] - vertical_word.pos[1]
-                < vertical_word.word.len() as isize
+                horizontal_word.overlaps(vertical_word)
                 &&
                 vertical_word.word.chars().nth(
                     (horizontal_word.pos[1] - vertical_word.pos[1]) as usize
