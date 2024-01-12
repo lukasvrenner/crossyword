@@ -127,7 +127,7 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
-    for _ in 0..1000 {
+    for _ in 0..10000 {
         let words = get_random_words(word_list);
         match generate_layout(&words) {
             Some(puzzle) => {
