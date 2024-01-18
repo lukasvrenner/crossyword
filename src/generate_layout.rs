@@ -2,6 +2,7 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
+#[derive(PartialEq, Debug)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -10,10 +11,12 @@ pub struct Word<'a> {
 #[derive(Debug, PartialEq)]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
-    clue: &'a str,
+    pub clue: &'a str,
     pub is_vertical: bool,
     pub pos: [isize; 2],
 }
+
+type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
     fn place<'a>(
@@ -65,20 +68,49 @@ impl Word<'_> {
     }
 }
 
-type Puzzle<'a> = Vec<PlacedWord<'a>>;
+impl PlacedWord<'_> {
+    fn overlaps(&self, word: &PlacedWord) -> bool {
+        let (vertical_word, horizontal_word) = if self.is_vertical {
+            (self, word)
+        } else {
+            (word, self)
+        };
+        vertical_word.pos[0] >= horizontal_word.pos[0] &&
+            vertical_word.pos[0] - horizontal_word.pos[0]
+            < horizontal_word.word.len() as isize
+            &&
+            horizontal_word.pos[1] >= vertical_word.pos[1] &&
+            horizontal_word.pos[1] - vertical_word.pos[1]
+            < vertical_word.word.len() as isize
+    }
 
-trait GetOverlaps {
-    fn get_overlaps(&self) -> u8;
-}
-
-impl GetOverlaps for Puzzle<'_> {
-    fn get_overlaps(&self) -> u8 {
-        todo!();
+    fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> u8 {
+        let mut overlaps: u8 = 0;
+        for word in placed_words {
+            if self.is_vertical ^ word.is_vertical {
+                overlaps += self.overlaps(word) as u8;
+            }
+        }
+        overlaps
     }
 }
 
+trait GetOverlaps {
+    fn total_overlaps(&self) -> u8;
+}
 
-pub fn format_words(all_words: &str) -> Option<Vec<Word>> {
+impl GetOverlaps for Puzzle<'_> {
+    fn total_overlaps(&self) -> u8 {
+        let mut double_total_overlaps = 0;
+        for word in self {
+            double_total_overlaps += word.number_of_overlaps(self);
+        }
+
+        double_total_overlaps / 2
+    }
+}
+
+pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
     for word in all_words.lines() {
         let mut split_word = word.split('.');
@@ -95,11 +127,11 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
-    for _ in 0..100 {
+    for _ in 0..10000 {
         let words = get_random_words(word_list);
-        match generate_layout(words) {
+        match generate_layout(&words) {
             Some(puzzle) => {
-                let overlaps = puzzle.get_overlaps();
+                let overlaps = puzzle.total_overlaps();
                 if overlaps > most_ovelaps {
                     most_ovelaps = overlaps;
                     best_puzzle = Some(puzzle);
@@ -123,7 +155,7 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-fn generate_layout<'a>(words: Vec<&'a Word<'a>>)
+fn generate_layout<'a>(words: &[&'a Word<'a>])
 -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
     for word in words {
@@ -149,13 +181,7 @@ fn illegal_overlap(
                 };
 
             illegal = 
-                vertical_word.pos[0] >= horizontal_word.pos[0] &&
-                vertical_word.pos[0] - horizontal_word.pos[0]
-                < horizontal_word.word.len() as isize
-                &&
-                horizontal_word.pos[1] >= vertical_word.pos[1] &&
-                horizontal_word.pos[1] - vertical_word.pos[1]
-                < vertical_word.word.len() as isize
+                horizontal_word.overlaps(vertical_word)
                 &&
                 vertical_word.word.chars().nth(
                     (horizontal_word.pos[1] - vertical_word.pos[1]) as usize
@@ -188,6 +214,26 @@ fn illegal_overlap(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const WORDS: &[Word<'_>] = &[
+        Word {
+            word: "cat",
+            clue: "an animal of group cat",
+        },
+        Word {
+            word: "tiger",
+            clue: "a wild species of cat",
+        },
+        Word {
+            word: "ought",
+            clue: "should",
+        },
+        Word {
+            word: "batter",
+            clue: "hit repeatedly",
+        }
+    ];
+
     const PLACED_WORDS: &[PlacedWord<'_>] = &[
         PlacedWord {
             word: "cat",
@@ -230,6 +276,25 @@ mod tests {
                 | r |
                  ---
 */
+
+    #[test]
+    fn parse() {
+        let unparsed = 
+"cat.an animal of group cat
+tiger.a wild species of cat
+ought.should
+batter.hit repeatedly";
+
+        assert_eq!(WORDS, parse_words(unparsed).unwrap());
+    }
+
+    #[test]
+    fn word_overlaps_other_word() {
+        assert!(PLACED_WORDS[1].overlaps(&PLACED_WORDS[2]));
+        assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[3]));
+        assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[2]));
+    }
+
     #[test]
     fn illegal() {
         let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
@@ -239,21 +304,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-    | s | i |   | a |
- --- --- --- --- ---
-| o | ! | g | h | t |
- --- --- --- --- ---
-    | e | e |   | t |
-     --- ---     ---
-    | s | r |   | e |
-     --- ---     ---
-    | s |       | r |
-     ---         ---
-*/
+
         assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
 
         let vert_opposite_orientation_legal: &PlacedWord<'_> = 
@@ -263,23 +314,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-    | l | i |   | a |
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-    | m | e |   | t |
-     --- ---     ---
-    | i | r |   | e |
-     --- ---     ---
-    | n |       | r |
-     ---         --- 
-    | a |
-     ---
-*/
+
         assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
 
         let hori_opposite_orientation_illegal: &PlacedWord<'_> = 
@@ -289,21 +324,7 @@ mod tests {
                 is_vertical: true,
                 pos: [1, 0],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- --- --- --- --- ---
-    | b | i | t | ! | e | r |
- --- --- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
 
         let hori_opposite_orientation_legal: &PlacedWord<'_> = 
@@ -313,21 +334,7 @@ mod tests {
                 is_vertical: false,
                 pos: [1, 1],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- --- --- ---
-    | b | i | t | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
 
         let hori_same_orientation_illegal: &PlacedWord<'_> = 
@@ -337,42 +344,13 @@ mod tests {
                 is_vertical: false,
                 pos: [3, 2],
             };
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- --- ---
-| o | u | g | ! | t | s |
- --- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+
         assert!(illegal_overlap(hori_same_orientation_illegal, PLACED_WORDS));
 
     }
 
     #[test]
     fn calc_position() {
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
         let vertical: Word<'_> = 
             Word {
                 word: "crouch",
@@ -387,21 +365,7 @@ mod tests {
                 pos: [0, 0],
             };
         assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-| r |   | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-| u |   | e |   | t |
- ---     ---     ---
-| c |   | r |   | e |
- ---     ---     ---
-| h |           | r |
- ---             ---
-*/
+
         let no_possible_pos: Word<'_> = 
             Word {
                 word: "snaps",
@@ -422,20 +386,5 @@ mod tests {
                 pos: [1, 3],
             };
         assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- --- --- ---
-    | b | e | t | t | e | r |
-     --- --- --- --- --- ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
     }
 }

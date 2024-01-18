@@ -14,7 +14,7 @@ fn main() {
     });
 
     // note: display error to window once GUI is created
-    let formatted_words = format_words(&unformatted_words)
+    let formatted_words = parse_words(&unformatted_words)
         .unwrap_or_else(||{
             eprintln!("could not parse {}", words_file);
             std::process::exit(1);
