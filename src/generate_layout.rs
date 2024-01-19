@@ -27,9 +27,8 @@ impl Word<'_> {
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
-                    Some(position) => {
-                        position as isize + placed_word.pos[!is_vertical as usize]
-                    },
+                    Some(position) =>
+                        position as isize + placed_word.pos[!is_vertical as usize],
                     None => continue,
                 };
 
@@ -75,12 +74,13 @@ impl PlacedWord<'_> {
         } else {
             (word, self)
         };
-        vertical_word.pos[0] >= horizontal_word.pos[0] &&
-            vertical_word.pos[0] - horizontal_word.pos[0]
+
+        vertical_word.pos[0] >= horizontal_word.pos[0]
+            && vertical_word.pos[0] - horizontal_word.pos[0]
             < horizontal_word.word.len() as isize
             &&
-            horizontal_word.pos[1] >= vertical_word.pos[1] &&
-            horizontal_word.pos[1] - vertical_word.pos[1]
+            horizontal_word.pos[1] >= vertical_word.pos[1]
+            && horizontal_word.pos[1] - vertical_word.pos[1]
             < vertical_word.word.len() as isize
     }
 
@@ -105,7 +105,6 @@ impl GetOverlaps for Puzzle<'_> {
         for word in self {
             double_total_overlaps += word.number_of_overlaps(self);
         }
-
         double_total_overlaps / 2
     }
 }
@@ -127,7 +126,7 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
-    for _ in 0..10000 {
+    for _ in 0..50000 {
         let words = get_random_words(word_list);
         match generate_layout(&words) {
             Some(puzzle) => {
