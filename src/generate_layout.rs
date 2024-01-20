@@ -100,12 +100,16 @@ trait GetOverlaps {
 }
 
 impl GetOverlaps for Puzzle<'_> {
+    /// calculates DOUBLE the total overlaps.
+    /// dividing by two is unneccesary because
+    /// values are only ever compared, and absolute
+    /// size does not matter
     fn total_overlaps(&self) -> u8 {
         let mut double_total_overlaps = 0;
         for word in self {
             double_total_overlaps += word.number_of_overlaps(self);
         }
-        double_total_overlaps / 2
+        double_total_overlaps
     }
 }
 
