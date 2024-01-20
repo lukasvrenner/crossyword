@@ -96,21 +96,19 @@ impl PlacedWord<'_> {
 }
 
 trait GetOverlaps {
-    fn double_total_overlaps(&self) -> u8;
+    fn total_overlaps(&self) -> u8;
 }
 
 impl GetOverlaps for Puzzle<'_> {
-
-    /// calculates DOUBLE the total overlaps.
-    /// dividing by two is unneccesary because
-    /// values are only ever compared, and absolute
-    /// size does not matter
-    fn double_total_overlaps(&self) -> u8 {
-        let mut double_total_overlaps = 0;
-        for word in self {
-            double_total_overlaps += word.number_of_overlaps(self);
+    fn total_overlaps(&self) -> u8 {
+        let mut total_overlaps = 0;
+        // we filter based on orientation because
+        // there is an equal number of vertical and
+        // horizontal overlaps
+        for word in self.iter().filter(|word| word.is_vertical) {
+            total_overlaps += word.number_of_overlaps(self);
         }
-        double_total_overlaps
+        total_overlaps
     }
 }
 
@@ -135,7 +133,7 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
         let words = get_random_words(word_list);
         match generate_layout(&words) {
             Some(puzzle) => {
-                let overlaps = puzzle.double_total_overlaps();
+                let overlaps = puzzle.total_overlaps();
                 if overlaps > most_ovelaps {
                     most_ovelaps = overlaps;
                     best_puzzle = Some(puzzle);
