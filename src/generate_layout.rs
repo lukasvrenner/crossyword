@@ -174,7 +174,6 @@ fn illegal_overlap(
     let mut illegal = false;
 
     for placed_word in placed_words {
-        // if they're perpendicular
         if placed_word.is_vertical ^ next_word.is_vertical {
 
             let (vertical_word, horizontal_word) =
@@ -187,6 +186,7 @@ fn illegal_overlap(
             illegal = 
                 horizontal_word.overlaps(vertical_word)
                 &&
+                // if overlapped characters are different
                 vertical_word.word.chars().nth(
                     (horizontal_word.pos[1] - vertical_word.pos[1]) as usize
                     )
