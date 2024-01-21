@@ -8,7 +8,7 @@ pub struct Word<'a> {
     pub clue: &'a str,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -99,6 +99,10 @@ trait GetOverlaps {
     fn total_overlaps(&self) -> u8;
 }
 
+// trait Shift {
+//     fn shift(self);
+// }
+
 impl GetOverlaps for Puzzle<'_> {
     fn total_overlaps(&self) -> u8 {
         let mut total_overlaps = 0;
@@ -111,6 +115,29 @@ impl GetOverlaps for Puzzle<'_> {
         total_overlaps
     }
 }
+
+// impl Shift for Puzzle<'_> {
+//     fn shift(self) {
+//         let mut left_most: isize = 0;
+//         let mut up_most: isize = 0;
+//
+//         for word in &self {
+//             let more_left = left_most > word.pos[0];
+//             let more_up = up_most > word.pos[1];
+//             left_most =
+//                 left_most * more_left as isize + 
+//                 left_most * !more_left as isize;
+//             up_most = 
+//                 up_most * more_up as isize +
+//                 up_most * !more_up as isize;
+//         }
+//
+//         for mut word in self {
+//             word.pos[0] -= left_most;
+//             word.pos[1] -= up_most;
+//         }
+//     }
+// }
 
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
@@ -295,6 +322,18 @@ batter.hit repeatedly";
         assert!(PLACED_WORDS[1].overlaps(&PLACED_WORDS[2]));
         assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[3]));
         assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[2]));
+    }
+
+    #[test]
+    fn count_individual_word_overlaps() {
+        assert_eq!(PLACED_WORDS[0].number_of_overlaps(PLACED_WORDS), 1);
+        assert_eq!(PLACED_WORDS[1].number_of_overlaps(PLACED_WORDS), 2);
+    }
+
+    #[test]
+    fn count_total_overlaps() {
+        let words_as_vec = PLACED_WORDS.to_vec();
+        assert_eq!(words_as_vec.total_overlaps(), 3);
     }
 
     #[test]
