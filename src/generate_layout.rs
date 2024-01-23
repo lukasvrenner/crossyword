@@ -141,7 +141,6 @@ impl GetOverlaps for Puzzle<'_> {
 
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
-    formatted_words.reserve_exact(NUM_WORDS);
 
     for word in all_words.lines() {
         let mut split_word = word.split('.');
