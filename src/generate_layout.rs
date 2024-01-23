@@ -141,6 +141,8 @@ impl GetOverlaps for Puzzle<'_> {
 
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
+    formatted_words.reserve_exact(NUM_WORDS);
+
     for word in all_words.lines() {
         let mut split_word = word.split('.');
         formatted_words.push(Word {
@@ -187,6 +189,8 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
 fn generate_layout<'a>(words: &[&'a Word<'a>])
 -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
+    placed_words.reserve_exact(NUM_WORDS);
+
     for word in words {
         placed_words.push(word.place(&placed_words)?);
     }
