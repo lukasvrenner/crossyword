@@ -178,6 +178,7 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     let random_indices = 
         rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
     let mut random_words: Vec<&'a Word> = Vec::new();
+    random_words.reserve_exact(NUM_WORDS);
 
     for index in random_indices {
         random_words.push(&word_list[index]);
