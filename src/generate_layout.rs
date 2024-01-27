@@ -2,13 +2,13 @@ use rand::thread_rng;
 
 const NUM_WORDS: usize = 10;
 
-#[derive(PartialEq, Debug)]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(test, derive(Debug, PartialEq, Clone, Copy))]
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -19,29 +19,27 @@ pub struct PlacedWord<'a> {
 type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
-    fn place<'a>(
-        &'a self, placed_words: &[PlacedWord<'a>]
-        ) -> Option<PlacedWord<'a>> {
+    fn place<'a>(&'a self, placed_words: &[PlacedWord<'a>])
+        -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
             let is_vertical = !placed_word.is_vertical;
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
-                    Some(position) =>
+                    Some(position) => 
                         position as isize + placed_word.pos[!is_vertical as usize],
                     None => continue,
                 };
 
-                let independant_axis_pos = {
-                    placed_word.pos[is_vertical as usize]  - index as isize
-                };
+                let independant_axis_pos =
+                    { placed_word.pos[is_vertical as usize] - index as isize };
 
                 let pos: [isize; 2] = if is_vertical {
                     [dependant_axis_pos, independant_axis_pos]
                 } else {
                     [independant_axis_pos, dependant_axis_pos]
                 };
-                
+
                 let next_word = PlacedWord {
                     word: self.word,
                     clue: self.clue,
@@ -78,9 +76,9 @@ impl PlacedWord<'_> {
         vertical_word.pos[0] >= horizontal_word.pos[0]
             && vertical_word.pos[0] - horizontal_word.pos[0]
             < horizontal_word.word.len() as isize
-            &&
+            && 
             horizontal_word.pos[1] >= vertical_word.pos[1]
-            && horizontal_word.pos[1] - vertical_word.pos[1]
+            && horizontal_word.pos[1] - vertical_word.pos[1] 
             < vertical_word.word.len() as isize
     }
 
@@ -99,9 +97,9 @@ trait GetOverlaps {
     fn total_overlaps(&self) -> u8;
 }
 
-// trait Shift {
-//     fn shift(self);
-// }
+trait Shift {
+    fn shift(self) -> Self;
+}
 
 impl GetOverlaps for Puzzle<'_> {
     fn total_overlaps(&self) -> u8 {
@@ -116,28 +114,31 @@ impl GetOverlaps for Puzzle<'_> {
     }
 }
 
-// impl Shift for Puzzle<'_> {
-//     fn shift(self) {
-//         let mut left_most: isize = 0;
-//         let mut up_most: isize = 0;
-//
-//         for word in &self {
-//             let more_left = left_most > word.pos[0];
-//             let more_up = up_most > word.pos[1];
-//             left_most =
-//                 left_most * more_left as isize + 
-//                 left_most * !more_left as isize;
-//             up_most = 
-//                 up_most * more_up as isize +
-//                 up_most * !more_up as isize;
-//         }
-//
-//         for mut word in self {
-//             word.pos[0] -= left_most;
-//             word.pos[1] -= up_most;
-//         }
-//     }
-// }
+impl Shift for Puzzle<'_> {
+
+    // shifts puzzle to make all coordinates >= 0
+    fn shift(mut self) -> Self {
+        let mut left_most: isize = 0;
+        let mut up_most: isize = 0;
+
+        for word in &self {
+            let more_left = left_most > word.pos[0];
+            let more_up = up_most > word.pos[1];
+            left_most = 
+                word.pos[0] * more_left as isize + 
+                left_most * !more_left as isize;
+            up_most =
+                word.pos[1] * more_up as isize +
+                up_most * !more_up as isize;
+        }
+
+        for word in &mut self {
+            word.pos[0] -= left_most;
+            word.pos[1] -= up_most;
+        }
+        self
+    }
+}
 
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words: Vec<Word> = Vec::new();
@@ -152,8 +153,7 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     Some(formatted_words)
 }
 
-pub fn new_puzzle<'a>(word_list: &'a [Word])
--> Option<Puzzle<'a>> {
+pub fn new_puzzle<'a>(word_list: &'a [Word]) -> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
@@ -166,11 +166,11 @@ pub fn new_puzzle<'a>(word_list: &'a [Word])
                     most_ovelaps = overlaps;
                     best_puzzle = Some(puzzle);
                 }
-            },
+            }
             None => continue,
         }
     }
-    best_puzzle
+    best_puzzle.map(|puzzle| puzzle.shift())
 }
 
 fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
@@ -186,8 +186,7 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-fn generate_layout<'a>(words: &[&'a Word<'a>])
--> Option<Puzzle<'a>> {
+fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
     placed_words.reserve_exact(NUM_WORDS);
 
@@ -204,16 +203,13 @@ fn illegal_overlap(
 
     for placed_word in placed_words {
         if placed_word.is_vertical ^ next_word.is_vertical {
+            let (vertical_word, horizontal_word) = if next_word.is_vertical {
+                (next_word, placed_word)
+            } else {
+                (placed_word, next_word)
+            };
 
-            let (vertical_word, horizontal_word) =
-                if next_word.is_vertical {
-                    (next_word, placed_word)
-                } else {
-                    (placed_word, next_word)
-                };
-
-            illegal = 
-                horizontal_word.overlaps(vertical_word)
+            illegal = horizontal_word.overlaps(vertical_word)
                 &&
                 // if overlapped characters are different
                 vertical_word.word.chars().nth(
@@ -227,13 +223,14 @@ fn illegal_overlap(
             // any same-direction overlap is illegal
             let is_vertical = next_word.is_vertical as usize;
             let is_horizontal = !next_word.is_vertical as usize;
-            illegal = 
-                (next_word.pos[is_vertical] - placed_word.pos[is_vertical]
-                 < next_word.word.len() as isize
-                 ||
-                 placed_word.pos[is_vertical] - next_word.pos[is_vertical] 
-                 < placed_word.word.len() as isize)
-                && placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
+            illegal = (
+                next_word.pos[is_vertical] - placed_word.pos[is_vertical]
+                < next_word.word.len() as isize
+                ||
+                placed_word.pos[is_vertical] - next_word.pos[is_vertical]
+                < placed_word.word.len() as isize)
+                && 
+                placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
         }
 
         if illegal {
@@ -264,7 +261,7 @@ mod tests {
         Word {
             word: "batter",
             clue: "hit repeatedly",
-        }
+        },
     ];
 
     const PLACED_WORDS: &[PlacedWord<'_>] = &[
@@ -291,29 +288,27 @@ mod tests {
             clue: "hit repeatedly",
             is_vertical: true,
             pos: [4, 0],
-        }
-
+        },
     ];
-/*
- --- --- ---     ---
-| c | a | t |   | b |
- --- --- ---     ---
-        | i |   | a | 
- --- --- --- --- ---
-| o | u | g | h | t |
- --- --- --- --- ---
-        | e |   | t |
-         ---     ---
-        | r |   | e |
-         ---     ---
-                | r |
-                 ---
-*/
+    /*
+     --- --- ---     ---
+    | c | a | t |   | b |
+     --- --- ---     ---
+            | i |   | a |
+     --- --- --- --- ---
+    | o | u | g | h | t |
+     --- --- --- --- ---
+            | e |   | t |
+             ---     ---
+            | r |   | e |
+             ---     ---
+                    | r |
+                     ---
+    */
 
     #[test]
     fn parse() {
-        let unparsed = 
-"cat.an animal of group cat
+        let unparsed = "cat.an animal of group cat
 tiger.a wild species of cat
 ought.should
 batter.hit repeatedly";
@@ -342,94 +337,99 @@ batter.hit repeatedly";
 
     #[test]
     fn illegal() {
-        let vert_opposite_orientation_illegal: &PlacedWord<'_> = 
-            &PlacedWord {
-                word: "assess",
-                clue: "to determine information from",
-                is_vertical: true,
-                pos: [1, 0],
-            };
+        let vert_opposite_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
+            word: "assess",
+            clue: "to determine information from",
+            is_vertical: true,
+            pos: [1, 0],
+        };
 
-        assert!(illegal_overlap(vert_opposite_orientation_illegal, PLACED_WORDS));
+        assert!(illegal_overlap(
+            vert_opposite_orientation_illegal,
+            PLACED_WORDS
+        ));
 
-        let vert_opposite_orientation_legal: &PlacedWord<'_> = 
-            &PlacedWord {
-                word: "alumina",
-                clue: "aluminium oxide",
-                is_vertical: true,
-                pos: [1, 0],
-            };
+        let vert_opposite_orientation_legal: &PlacedWord<'_> = &PlacedWord {
+            word: "alumina",
+            clue: "aluminium oxide",
+            is_vertical: true,
+            pos: [1, 0],
+        };
 
-        assert!(!illegal_overlap(vert_opposite_orientation_legal, PLACED_WORDS));
+        assert!(!illegal_overlap(
+            vert_opposite_orientation_legal,
+            PLACED_WORDS
+        ));
 
-        let hori_opposite_orientation_illegal: &PlacedWord<'_> = 
-            &PlacedWord {
-                word: "bitter",
-                clue: "having a sharp, pungent taste or smell",
-                is_vertical: true,
-                pos: [1, 0],
-            };
+        let hori_opposite_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
+            word: "bitter",
+            clue: "having a sharp, pungent taste or smell",
+            is_vertical: true,
+            pos: [1, 0],
+        };
 
-        assert!(illegal_overlap(hori_opposite_orientation_illegal, PLACED_WORDS));
+        assert!(illegal_overlap(
+            hori_opposite_orientation_illegal,
+            PLACED_WORDS
+        ));
 
-        let hori_opposite_orientation_legal: &PlacedWord<'_> = 
-            &PlacedWord {
-                word: "bit",
-                clue: "small amount",
-                is_vertical: false,
-                pos: [1, 1],
-            };
+        let hori_opposite_orientation_legal: &PlacedWord<'_> = &PlacedWord {
+            word: "bit",
+            clue: "small amount",
+            is_vertical: false,
+            pos: [1, 1],
+        };
 
-        assert!(!illegal_overlap(hori_opposite_orientation_legal, PLACED_WORDS));
+        assert!(!illegal_overlap(
+            hori_opposite_orientation_legal,
+            PLACED_WORDS
+        ));
 
-        let hori_same_orientation_illegal: &PlacedWord<'_> = 
-            &PlacedWord {
-                word: "its",
-                clue: "posessive case of it",
-                is_vertical: false,
-                pos: [3, 2],
-            };
+        let hori_same_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
+            word: "its",
+            clue: "posessive case of it",
+            is_vertical: false,
+            pos: [3, 2],
+        };
 
         assert!(illegal_overlap(hori_same_orientation_illegal, PLACED_WORDS));
-
     }
 
     #[test]
     fn calc_position() {
-        let vertical: Word<'_> = 
-            Word {
-                word: "crouch",
-                clue: "kneel",
-            };
+        let vertical: Word<'_> = Word {
+            word: "crouch",
+            clue: "kneel",
+        };
 
-        let vertical_placed: PlacedWord<'_> = 
-            PlacedWord {
-                word: "crouch",
-                clue: "kneel",
-                is_vertical: true,
-                pos: [0, 0],
-            };
+        let vertical_placed: PlacedWord<'_> = PlacedWord {
+            word: "crouch",
+            clue: "kneel",
+            is_vertical: true,
+            pos: [0, 0],
+        };
         assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
 
-        let no_possible_pos: Word<'_> = 
-            Word {
-                word: "snaps",
-                clue: "breaks",
-            };
+        let no_possible_pos: Word<'_> = Word {
+            word: "snaps",
+            clue: "breaks",
+        };
         assert_eq!(no_possible_pos.place(PLACED_WORDS), None);
 
-        let horizontal: Word<'_> = 
-            Word {
-                word: "better",
-                clue: "superior",
-            };
-        let horizontal_placed: PlacedWord<'_> = 
-            PlacedWord {
-                word: "better",
-                clue: "superior",
-                is_vertical: false,
-                pos: [1, 3],
-            };
+        let horizontal: Word<'_> = Word {
+            word: "better",
+            clue: "superior",
+        };
+        let horizontal_placed: PlacedWord<'_> = PlacedWord {
+            word: "better",
+            clue: "superior",
+            is_vertical: false,
+            pos: [1, 3],
+        };
         assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
     }
+
+    // #[test]
+    // fn shift() {
+    // }
 }
