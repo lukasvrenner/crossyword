@@ -19,6 +19,9 @@ pub struct PlacedWord<'a> {
 type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
+    /// calculates positions for `self`
+    /// to join `placed_words`
+    /// does *not* add self to `placed_words`
     fn place<'a>(&'a self, placed_words: &[PlacedWord<'a>])
         -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
@@ -66,6 +69,9 @@ impl Word<'_> {
 }
 
 impl PlacedWord<'_> {
+    /// returns `true` if `word` overlaps `self`
+    /// otherwise, returns `false`
+    /// only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWord) -> bool {
         let (vertical_word, horizontal_word) = if self.is_vertical {
             (self, word)
