@@ -11,5 +11,9 @@ keywords = ["crossword"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+opt-level = 3
+lto = true
+
 [dependencies]
 rand = "0.8.5"
