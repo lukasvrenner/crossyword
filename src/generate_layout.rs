@@ -1,14 +1,15 @@
-use rand::thread_rng;
+//! A collection of functions and types for creating crossword puzzles
 
-const NUM_WORDS: usize = 10;
-
+/// initial `Word` type, with no additianl metadata
 #[cfg_attr(test, derive(PartialEq, Debug))]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
 }
 
-#[cfg_attr(test, derive(Debug, PartialEq, Clone, Copy))]
+/// like `Word`, but with additional metadata
+#[cfg_attr(test, derive(PartialEq, Clone, Copy))]
+#[derive(Debug)] // only for development purposes -- remove once GUI is created
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -21,7 +22,7 @@ type Puzzle<'a> = Vec<PlacedWord<'a>>;
 impl Word<'_> {
     /// calculates positions for `self`
     /// to join `placed_words`
-    /// does *not* add self to `placed_words`
+    /// does *not* add `self` to `placed_words`
     fn place<'a>(&'a self, placed_words: &[PlacedWord<'a>])
         -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
@@ -71,7 +72,7 @@ impl Word<'_> {
 impl PlacedWord<'_> {
     /// returns `true` if `word` overlaps `self`
     /// otherwise, returns `false`
-    /// only works properly if the words are perpendicular
+    /// note: only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWord) -> bool {
         let (vertical_word, horizontal_word) = if self.is_vertical {
             (self, word)
@@ -88,6 +89,7 @@ impl PlacedWord<'_> {
             < vertical_word.word.len() as isize
     }
 
+    /// returns the number of words in `placed_words` `self` overlaps with
     fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> u8 {
         let mut overlaps: u8 = 0;
         for word in placed_words {
@@ -108,9 +110,10 @@ trait Shift {
 }
 
 impl GetOverlaps for Puzzle<'_> {
+    /// returns the total number of times two words overlap
     fn total_overlaps(&self) -> u8 {
         let mut total_overlaps = 0;
-        // we filter based on orientation because
+        // filter based on orientation because
         // there is an equal number of vertical and
         // horizontal overlaps
         for word in self.iter().filter(|word| word.is_vertical) {
@@ -121,8 +124,7 @@ impl GetOverlaps for Puzzle<'_> {
 }
 
 impl Shift for Puzzle<'_> {
-
-    // shifts puzzle to make all coordinates >= 0
+    /// shifts puzzle so that all coordinates are >= 0
     fn shift(mut self) -> Self {
         let mut left_most: isize = 0;
         let mut up_most: isize = 0;
@@ -159,12 +161,12 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     Some(formatted_words)
 }
 
-pub fn new_puzzle<'a>(word_list: &'a [Word]) -> Option<Puzzle<'a>> {
+pub fn new_puzzle<'a>(word_list: &'a [Word], num_words: usize) -> Option<Puzzle<'a>> {
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
     for _ in 0..50000 {
-        let words = get_random_words(word_list);
+        let words = get_random_words(word_list, num_words);
         match generate_layout(&words) {
             Some(puzzle) => {
                 let overlaps = puzzle.total_overlaps();
@@ -179,12 +181,14 @@ pub fn new_puzzle<'a>(word_list: &'a [Word]) -> Option<Puzzle<'a>> {
     best_puzzle.map(|puzzle| puzzle.shift())
 }
 
-fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
-    let mut rng = thread_rng();
+/// uses `rand` crate to pick `num_words` words
+fn get_random_words<'a>(word_list: &'a [Word], num_words: usize)
+-> Vec<&'a Word<'a>> {
+    let mut rng = rand::thread_rng();
     let random_indices = 
-        rand::seq::index::sample(&mut rng, word_list.len(), NUM_WORDS);
+        rand::seq::index::sample(&mut rng, word_list.len(), num_words);
     let mut random_words: Vec<&'a Word> = Vec::new();
-    random_words.reserve_exact(NUM_WORDS);
+    random_words.reserve_exact(num_words);
 
     for index in random_indices {
         random_words.push(&word_list[index]);
@@ -192,9 +196,11 @@ fn get_random_words<'a>(word_list: &'a [Word]) -> Vec<&'a Word<'a>> {
     random_words
 }
 
-fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<Puzzle<'a>> {
+/// attempts to create a crossword puzzle from `words`
+fn generate_layout<'a>(words: &[&'a Word<'a>])
+-> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
-    placed_words.reserve_exact(NUM_WORDS);
+    placed_words.reserve_exact(words.len());
 
     for word in words {
         placed_words.push(word.place(&placed_words)?);
@@ -202,6 +208,10 @@ fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<Puzzle<'a>> {
     Some(placed_words)
 }
 
+/// returns `true` if `next_word` has any "illegal" overlaps in `placed_words`
+///
+/// an overlap is considered "illegal" if the letters at the place of overlap
+/// are not the same
 fn illegal_overlap(
     next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>]
     ) -> bool {

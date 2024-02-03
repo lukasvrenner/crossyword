@@ -20,8 +20,8 @@ fn main() {
             std::process::exit(1);
         });
 
-    let _puzzle = new_puzzle(&formatted_words).unwrap();
-    // println!("{:?}", puzzle);
+    let puzzle = new_puzzle(&formatted_words, 10).unwrap();
+    println!("{:?}", puzzle);
 
 }
 
