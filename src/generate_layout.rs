@@ -17,7 +17,7 @@ pub struct PlacedWord<'a> {
     pub pos: [isize; 2],
 }
 
-type Puzzle<'a> = Vec<PlacedWord<'a>>;
+pub type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
     /// calculates positions for `self`

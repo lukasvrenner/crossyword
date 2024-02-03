@@ -1,7 +1,9 @@
 use std::fs;
 
 mod generate_layout;
-use crate::generate_layout::*;
+use crate::generate_layout::{
+    parse_words, new_puzzle
+};
 
 fn main() {
     let words_file = "./words.txt";
