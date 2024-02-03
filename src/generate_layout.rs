@@ -23,16 +23,19 @@ impl Word<'_> {
     /// calculates positions for `self`
     /// to join `placed_words`
     /// does *not* add `self` to `placed_words`
-    fn place<'a>(&'a self, placed_words: &[PlacedWord<'a>])
-        -> Option<PlacedWord<'a>> {
+    fn place<'a>(
+        &'a self,
+        placed_words: &[PlacedWord<'a>],
+    ) -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
             let is_vertical = !placed_word.is_vertical;
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
-                    Some(position) => 
-                        position as isize + 
-                        placed_word.pos[!is_vertical as usize],
+                    Some(position) => {
+                        position as isize
+                            + placed_word.pos[!is_vertical as usize]
+                    }
                     None => continue,
                 };
 
@@ -83,11 +86,10 @@ impl PlacedWord<'_> {
 
         vertical_word.pos[0] >= horizontal_word.pos[0]
             && vertical_word.pos[0] - horizontal_word.pos[0]
-            < horizontal_word.word.len() as isize
-            && 
-            horizontal_word.pos[1] >= vertical_word.pos[1]
-            && horizontal_word.pos[1] - vertical_word.pos[1] 
-            < vertical_word.word.len() as isize
+                < horizontal_word.word.len() as isize
+            && horizontal_word.pos[1] >= vertical_word.pos[1]
+            && horizontal_word.pos[1] - vertical_word.pos[1]
+                < vertical_word.word.len() as isize
     }
 
     /// returns the number of words in `placed_words` `self` overlaps with
@@ -133,12 +135,10 @@ impl Shift for Puzzle<'_> {
         for word in &self {
             let more_left = left_most > word.pos[0];
             let more_up = up_most > word.pos[1];
-            left_most = 
-                word.pos[0] * more_left as isize + 
-                left_most * !more_left as isize;
+            left_most = word.pos[0] * more_left as isize
+                + left_most * !more_left as isize;
             up_most =
-                word.pos[1] * more_up as isize +
-                up_most * !more_up as isize;
+                word.pos[1] * more_up as isize + up_most * !more_up as isize;
         }
 
         for word in &mut self {
@@ -162,7 +162,11 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     Some(formatted_words)
 }
 
-pub fn new_puzzle<'a>(word_list: &'a [Word], num_words: usize) -> Option<Puzzle<'a>> {
+pub fn new_puzzle<'a>(
+    word_list: &'a [Word],
+    num_words: usize,
+) -> Option<Puzzle<'a>> {
+
     let mut best_puzzle: Option<Puzzle> = None;
     let mut most_ovelaps: u8 = 0;
 
@@ -183,10 +187,12 @@ pub fn new_puzzle<'a>(word_list: &'a [Word], num_words: usize) -> Option<Puzzle<
 }
 
 /// uses `rand` crate to pick `num_words` words
-fn get_random_words<'a>(word_list: &'a [Word], num_words: usize)
--> Vec<&'a Word<'a>> {
+fn get_random_words<'a>(
+    word_list: &'a [Word],
+    num_words: usize,
+) -> Vec<&'a Word<'a>> {
     let mut rng = rand::thread_rng();
-    let random_indices = 
+    let random_indices =
         rand::seq::index::sample(&mut rng, word_list.len(), num_words);
     let mut random_words: Vec<&'a Word> = Vec::new();
     random_words.reserve_exact(num_words);
@@ -198,8 +204,7 @@ fn get_random_words<'a>(word_list: &'a [Word], num_words: usize)
 }
 
 /// attempts to create a crossword puzzle from `words`
-fn generate_layout<'a>(words: &[&'a Word<'a>])
--> Option<Puzzle<'a>> {
+fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<Puzzle<'a>> {
     let mut placed_words: Puzzle = Vec::new();
     placed_words.reserve_exact(words.len());
 
@@ -214,10 +219,11 @@ fn generate_layout<'a>(words: &[&'a Word<'a>])
 /// an overlap is considered "illegal" if the letters at the place of overlap
 /// are not the same
 fn illegal_overlap(
-    next_word: &PlacedWord<'_>, placed_words: &[PlacedWord<'_>]
-    ) -> bool {
-    let mut illegal = false;
+    next_word: &PlacedWord<'_>,
+    placed_words: &[PlacedWord<'_>],
+) -> bool {
 
+    let mut illegal = false;
     for placed_word in placed_words {
         if placed_word.is_vertical ^ next_word.is_vertical {
             let (vertical_word, horizontal_word) = if next_word.is_vertical {
@@ -240,14 +246,13 @@ fn illegal_overlap(
             // any same-direction overlap is illegal
             let is_vertical = next_word.is_vertical as usize;
             let is_horizontal = !next_word.is_vertical as usize;
-            illegal = (
-                next_word.pos[is_vertical] - placed_word.pos[is_vertical]
+            illegal = (next_word.pos[is_vertical]
+                - placed_word.pos[is_vertical]
                 < next_word.word.len() as isize
-                ||
-                placed_word.pos[is_vertical] - next_word.pos[is_vertical]
-                < placed_word.word.len() as isize)
-                && 
-                placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
+                || placed_word.pos[is_vertical] - next_word.pos[is_vertical]
+                    < placed_word.word.len() as isize)
+                && placed_word.pos[is_horizontal]
+                    == next_word.pos[is_horizontal];
         }
 
         if illegal {

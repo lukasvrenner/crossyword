@@ -1,29 +1,25 @@
 use std::fs;
 
 mod generate_layout;
-use crate::generate_layout::{
-    parse_words, new_puzzle
-};
+use crate::generate_layout::{new_puzzle, parse_words};
 
 fn main() {
     let words_file = "./words.txt";
 
     // note: display error to window once GUI is created
-    let unformatted_words = fs::read_to_string(words_file)
-        .unwrap_or_else(|err| {
+    let unformatted_words =
+        fs::read_to_string(words_file).unwrap_or_else(|err| {
             eprintln!("could not read {}: {}", words_file, err);
             std::process::exit(1);
-    });
+        });
 
     // note: display error to window once GUI is created
-    let formatted_words = parse_words(&unformatted_words)
-        .unwrap_or_else(||{
+    let formatted_words =
+        parse_words(&unformatted_words).unwrap_or_else(|| {
             eprintln!("could not parse {}", words_file);
             std::process::exit(1);
         });
 
     let puzzle = new_puzzle(&formatted_words, 10).unwrap();
     println!("{:?}", puzzle);
-
 }
-
