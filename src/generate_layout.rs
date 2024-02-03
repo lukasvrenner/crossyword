@@ -31,12 +31,13 @@ impl Word<'_> {
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
                     Some(position) => 
-                        position as isize + placed_word.pos[!is_vertical as usize],
+                        position as isize + 
+                        placed_word.pos[!is_vertical as usize],
                     None => continue,
                 };
 
                 let independant_axis_pos =
-                    { placed_word.pos[is_vertical as usize] - index as isize };
+                    placed_word.pos[is_vertical as usize] - index as isize;
 
                 let pos: [isize; 2] = if is_vertical {
                     [dependant_axis_pos, independant_axis_pos]
