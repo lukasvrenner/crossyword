@@ -94,7 +94,7 @@ impl PlacedWord<'_> {
 
     /// returns the number of words in `placed_words` `self` overlaps with
     fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> u8 {
-        let mut overlaps: u8 = 0;
+        let mut overlaps = 0u8;
         for word in placed_words {
             if self.is_vertical ^ word.is_vertical {
                 overlaps += self.overlaps(word) as u8;
@@ -129,8 +129,8 @@ impl GetOverlaps for Puzzle<'_> {
 impl Shift for Puzzle<'_> {
     /// shifts puzzle so that all coordinates are >= 0
     fn shift(mut self) -> Self {
-        let mut left_most: isize = 0;
-        let mut up_most: isize = 0;
+        let mut left_most = 0isize;
+        let mut up_most = 0isize;
 
         for word in &self {
             let more_left = left_most > word.pos[0];
@@ -150,7 +150,7 @@ impl Shift for Puzzle<'_> {
 }
 
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
-    let mut formatted_words: Vec<Word> = Vec::new();
+    let mut formatted_words = Vec::<Word>::new();
 
     for word in all_words.lines() {
         let mut split_word = word.split('.');
@@ -166,9 +166,8 @@ pub fn new_puzzle<'a>(
     word_list: &'a [Word],
     num_words: usize,
 ) -> Option<Puzzle<'a>> {
-
-    let mut best_puzzle: Option<Puzzle> = None;
-    let mut most_ovelaps: u8 = 0;
+    let mut best_puzzle = None::<Puzzle>;
+    let mut most_ovelaps = 0u8;
 
     for _ in 0..50000 {
         let words = get_random_words(word_list, num_words);
@@ -194,7 +193,7 @@ fn get_random_words<'a>(
     let mut rng = rand::thread_rng();
     let random_indices =
         rand::seq::index::sample(&mut rng, word_list.len(), num_words);
-    let mut random_words: Vec<&'a Word> = Vec::new();
+    let mut random_words = Vec::<&'a Word>::new();
     random_words.reserve_exact(num_words);
 
     for index in random_indices {
@@ -222,7 +221,6 @@ fn illegal_overlap(
     next_word: &PlacedWord<'_>,
     placed_words: &[PlacedWord<'_>],
 ) -> bool {
-
     let mut illegal = false;
     for placed_word in placed_words {
         if placed_word.is_vertical ^ next_word.is_vertical {
