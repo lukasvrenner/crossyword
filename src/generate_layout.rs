@@ -8,6 +8,7 @@ pub enum Orientation {
 
 impl std::ops::Not for Orientation {
     type Output = Self;
+    #[inline(always)]
     fn not(self) -> Self::Output {
         match self {
             Orientation::Vertical => Orientation::Horizontal,
@@ -189,6 +190,9 @@ pub fn new_puzzle<'a>(
     word_list: &'a [Word],
     num_words: usize,
 ) -> Option<Puzzle<'a>> {
+    use std::time::Instant;
+    let now = Instant::now();
+
     let mut best_puzzle = None::<Puzzle>;
     let mut most_ovelaps = 0u8;
 
@@ -205,6 +209,7 @@ pub fn new_puzzle<'a>(
             None => continue,
         }
     }
+    println!("{:.2?}", now.elapsed());
     best_puzzle.map(|puzzle| puzzle.shift())
 }
 
@@ -272,7 +277,6 @@ fn illegal_overlap(
                 < next_word.word.len() as isize
                 || placed_word.pos[is_vertical] - next_word.pos[is_vertical]
                     < placed_word.word.len() as isize)
-
                 && placed_word.pos[is_horizontal]
                     == next_word.pos[is_horizontal];
         }
