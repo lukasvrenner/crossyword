@@ -181,6 +181,8 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     Some(formatted_words)
 }
 
+/// creates a new `Puzzle` (which is just an alias for `Vec<PlacedWord>`)
+/// given a word list, `word_list`, and a number of words to use, `num_words`
 pub fn new_puzzle<'a>(
     word_list: &'a [Word],
     num_words: usize,
