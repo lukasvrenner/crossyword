@@ -2,15 +2,8 @@
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Orientation {
-    Horizontal,
-    Vertical,
-}
-
-/// initial `Word` type, with no additianl metadata
-#[cfg_attr(test, derive(PartialEq, Debug))]
-pub struct Word<'a> {
-    pub word: &'a str,
-    pub clue: &'a str,
+    Horizontal = 0,
+    Vertical = 1,
 }
 
 impl std::ops::Not for Orientation {
@@ -22,17 +15,13 @@ impl std::ops::Not for Orientation {
         }
     }
 }
-/// like `Word`, but with additional metadata
-#[cfg_attr(test, derive(PartialEq, Clone, Copy))]
-#[derive(Debug)] // only for development purposes -- remove once GUI is created
-pub struct PlacedWord<'a> {
+
+/// initial `Word` type, with no additianl metadata
+#[cfg_attr(test, derive(PartialEq, Debug))]
+pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
-    pub orientation: Orientation,
-    pub pos: [isize; 2],
 }
-
-pub type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl Word<'_> {
     /// calculates positions for `self`
@@ -91,6 +80,16 @@ impl Word<'_> {
     }
 }
 
+/// like `Word`, but with additional metadata
+#[cfg_attr(test, derive(PartialEq, Clone, Copy))]
+#[derive(Debug)] // only for development purposes -- remove once GUI is created
+pub struct PlacedWord<'a> {
+    pub word: &'a str,
+    pub clue: &'a str,
+    pub orientation: Orientation,
+    pub pos: [isize; 2],
+}
+
 impl PlacedWord<'_> {
     /// returns `true` if `word` overlaps `self`
     /// otherwise, returns `false`
@@ -128,6 +127,8 @@ trait GetOverlaps {
 trait Shift {
     fn shift(self) -> Self;
 }
+
+pub type Puzzle<'a> = Vec<PlacedWord<'a>>;
 
 impl GetOverlaps for Puzzle<'_> {
     /// returns the total number of times two words overlap
@@ -181,6 +182,7 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     Some(formatted_words)
 }
 
+// consider changing to Puzzle::new()
 /// creates a new `Puzzle` (which is just an alias for `Vec<PlacedWord>`)
 /// given a word list, `word_list`, and a number of words to use, `num_words`
 pub fn new_puzzle<'a>(
