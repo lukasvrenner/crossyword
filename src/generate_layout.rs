@@ -43,35 +43,33 @@ impl Word<'_> {
         placed_words: &[PlacedWord<'a>],
     ) -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
-            let is_vertical = !placed_word.orientation;
+            let new_orientation = !placed_word.orientation;
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
                     Some(position) => {
                         position as isize
-                            + placed_word.pos[!is_vertical as usize]
+                            + placed_word.pos[!new_orientation as usize]
                     }
                     None => continue,
                 };
 
                 let independant_axis_pos =
-                    placed_word.pos[is_vertical as usize] - index as isize;
+                    placed_word.pos[new_orientation as usize] - index as isize;
 
-                // let pos: [isize; 2] = if is_vertical {
-                //     [dependant_axis_pos, independant_axis_pos]
-                // } else {
-                //     [independant_axis_pos, dependant_axis_pos]
-                // };
-                let pos: [isize; 2] = match is_vertical {
-                    Orientation::Vertical => [dependant_axis_pos, independant_axis_pos],
-                    Orientation::Horizontal => [independant_axis_pos, dependant_axis_pos],
+                let pos: [isize; 2] = match new_orientation {
+                    Orientation::Vertical => {
+                        [dependant_axis_pos, independant_axis_pos]
+                    }
+                    Orientation::Horizontal => {
+                        [independant_axis_pos, dependant_axis_pos]
+                    }
                 };
-
 
                 let next_word = PlacedWord {
                     word: self.word,
                     clue: self.clue,
-                    orientation: is_vertical,
+                    orientation: new_orientation,
                     pos,
                 };
 
@@ -98,11 +96,6 @@ impl PlacedWord<'_> {
     /// otherwise, returns `false`
     /// note: only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWord) -> bool {
-        // let (vertical_word, horizontal_word) = if self.orientation {
-        //     (self, word)
-        // } else {
-        //     (word, self)
-        // };
         let (vertical_word, horizontal_word) = match self.orientation {
             Orientation::Vertical => (self, word),
             Orientation::Horizontal => (word, self),
@@ -140,10 +133,12 @@ impl GetOverlaps for Puzzle<'_> {
     /// returns the total number of times two words overlap
     fn total_overlaps(&self) -> u8 {
         let mut total_overlaps = 0;
-        // filter based on orientation because
-        // there is an equal number of vertical and
-        // horizontal overlaps
-        for word in self.iter().filter(|word| word.orientation == Orientation::Horizontal) {
+        // .filter() offers a minor performance boost
+        // because we only have to count half of the words
+        for word in self
+            .iter()
+            .filter(|word| word.orientation == Orientation::Horizontal)
+        {
             total_overlaps += word.number_of_overlaps(self);
         }
         total_overlaps
@@ -267,11 +262,13 @@ fn illegal_overlap(
             // any same-direction overlap is illegal
             let is_vertical = next_word.orientation as usize;
             let is_horizontal = !next_word.orientation as usize;
+
             illegal = (next_word.pos[is_vertical]
                 - placed_word.pos[is_vertical]
                 < next_word.word.len() as isize
                 || placed_word.pos[is_vertical] - next_word.pos[is_vertical]
                     < placed_word.word.len() as isize)
+
                 && placed_word.pos[is_horizontal]
                     == next_word.pos[is_horizontal];
         }
