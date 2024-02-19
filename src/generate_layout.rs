@@ -1,5 +1,11 @@
 //! A collection of functions and types for creating crossword puzzles
 
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
 /// initial `Word` type, with no additianl metadata
 #[cfg_attr(test, derive(PartialEq, Debug))]
 pub struct Word<'a> {
@@ -7,13 +13,22 @@ pub struct Word<'a> {
     pub clue: &'a str,
 }
 
+impl std::ops::Not for Orientation {
+    type Output = Self;
+    fn not(self) -> Self::Output {
+        match self {
+            Orientation::Vertical => Orientation::Horizontal,
+            Orientation::Horizontal => Orientation::Vertical,
+        }
+    }
+}
 /// like `Word`, but with additional metadata
 #[cfg_attr(test, derive(PartialEq, Clone, Copy))]
 #[derive(Debug)] // only for development purposes -- remove once GUI is created
 pub struct PlacedWord<'a> {
     pub word: &'a str,
     pub clue: &'a str,
-    pub is_vertical: bool,
+    pub orientation: Orientation,
     pub pos: [isize; 2],
 }
 
@@ -28,7 +43,7 @@ impl Word<'_> {
         placed_words: &[PlacedWord<'a>],
     ) -> Option<PlacedWord<'a>> {
         for placed_word in placed_words {
-            let is_vertical = !placed_word.is_vertical;
+            let is_vertical = !placed_word.orientation;
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
@@ -42,16 +57,21 @@ impl Word<'_> {
                 let independant_axis_pos =
                     placed_word.pos[is_vertical as usize] - index as isize;
 
-                let pos: [isize; 2] = if is_vertical {
-                    [dependant_axis_pos, independant_axis_pos]
-                } else {
-                    [independant_axis_pos, dependant_axis_pos]
+                // let pos: [isize; 2] = if is_vertical {
+                //     [dependant_axis_pos, independant_axis_pos]
+                // } else {
+                //     [independant_axis_pos, dependant_axis_pos]
+                // };
+                let pos: [isize; 2] = match is_vertical {
+                    Orientation::Vertical => [dependant_axis_pos, independant_axis_pos],
+                    Orientation::Horizontal => [independant_axis_pos, dependant_axis_pos],
                 };
+
 
                 let next_word = PlacedWord {
                     word: self.word,
                     clue: self.clue,
-                    is_vertical,
+                    orientation: is_vertical,
                     pos,
                 };
 
@@ -64,7 +84,7 @@ impl Word<'_> {
             let next_word = PlacedWord {
                 word: self.word,
                 clue: self.clue,
-                is_vertical: false,
+                orientation: Orientation::Horizontal,
                 pos: [0, 0],
             };
             return Some(next_word);
@@ -78,10 +98,14 @@ impl PlacedWord<'_> {
     /// otherwise, returns `false`
     /// note: only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWord) -> bool {
-        let (vertical_word, horizontal_word) = if self.is_vertical {
-            (self, word)
-        } else {
-            (word, self)
+        // let (vertical_word, horizontal_word) = if self.orientation {
+        //     (self, word)
+        // } else {
+        //     (word, self)
+        // };
+        let (vertical_word, horizontal_word) = match self.orientation {
+            Orientation::Vertical => (self, word),
+            Orientation::Horizontal => (word, self),
         };
 
         vertical_word.pos[0] >= horizontal_word.pos[0]
@@ -96,7 +120,7 @@ impl PlacedWord<'_> {
     fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> u8 {
         let mut overlaps = 0u8;
         for word in placed_words {
-            if self.is_vertical ^ word.is_vertical {
+            if self.orientation != word.orientation {
                 overlaps += self.overlaps(word) as u8;
             }
         }
@@ -119,7 +143,7 @@ impl GetOverlaps for Puzzle<'_> {
         // filter based on orientation because
         // there is an equal number of vertical and
         // horizontal overlaps
-        for word in self.iter().filter(|word| word.is_vertical) {
+        for word in self.iter().filter(|word| word.orientation == Orientation::Horizontal) {
             total_overlaps += word.number_of_overlaps(self);
         }
         total_overlaps
@@ -223,11 +247,10 @@ fn illegal_overlap(
 ) -> bool {
     let mut illegal = false;
     for placed_word in placed_words {
-        if placed_word.is_vertical ^ next_word.is_vertical {
-            let (vertical_word, horizontal_word) = if next_word.is_vertical {
-                (next_word, placed_word)
-            } else {
-                (placed_word, next_word)
+        if placed_word.orientation != next_word.orientation {
+            let (vertical_word, horizontal_word) = match next_word.orientation {
+                Orientation::Vertical => (next_word, placed_word),
+                Orientation::Horizontal => (placed_word, next_word),
             };
 
             illegal = horizontal_word.overlaps(vertical_word)
@@ -242,8 +265,8 @@ fn illegal_overlap(
                     );
         } else {
             // any same-direction overlap is illegal
-            let is_vertical = next_word.is_vertical as usize;
-            let is_horizontal = !next_word.is_vertical as usize;
+            let is_vertical = next_word.orientation as usize;
+            let is_horizontal = !next_word.orientation as usize;
             illegal = (next_word.pos[is_vertical]
                 - placed_word.pos[is_vertical]
                 < next_word.word.len() as isize
@@ -288,25 +311,25 @@ mod tests {
         PlacedWord {
             word: "cat",
             clue: "an animal of group cat",
-            is_vertical: false,
+            orientation: Orientation::Horizontal,
             pos: [0, 0],
         },
         PlacedWord {
             word: "tiger",
             clue: "a wild species of cat",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [2, 0],
         },
         PlacedWord {
             word: "ought",
             clue: "should",
-            is_vertical: false,
+            orientation: Orientation::Horizontal,
             pos: [0, 2],
         },
         PlacedWord {
             word: "batter",
             clue: "hit repeatedly",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [4, 0],
         },
     ];
@@ -360,7 +383,7 @@ batter.hit repeatedly";
         let vert_opposite_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
             word: "assess",
             clue: "to determine information from",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [1, 0],
         };
 
@@ -372,7 +395,7 @@ batter.hit repeatedly";
         let vert_opposite_orientation_legal: &PlacedWord<'_> = &PlacedWord {
             word: "alumina",
             clue: "aluminium oxide",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [1, 0],
         };
 
@@ -384,7 +407,7 @@ batter.hit repeatedly";
         let hori_opposite_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
             word: "bitter",
             clue: "having a sharp, pungent taste or smell",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [1, 0],
         };
 
@@ -396,7 +419,7 @@ batter.hit repeatedly";
         let hori_opposite_orientation_legal: &PlacedWord<'_> = &PlacedWord {
             word: "bit",
             clue: "small amount",
-            is_vertical: false,
+            orientation: Orientation::Horizontal,
             pos: [1, 1],
         };
 
@@ -408,7 +431,7 @@ batter.hit repeatedly";
         let hori_same_orientation_illegal: &PlacedWord<'_> = &PlacedWord {
             word: "its",
             clue: "posessive case of it",
-            is_vertical: false,
+            orientation: Orientation::Horizontal,
             pos: [3, 2],
         };
 
@@ -425,7 +448,7 @@ batter.hit repeatedly";
         let vertical_placed: PlacedWord<'_> = PlacedWord {
             word: "crouch",
             clue: "kneel",
-            is_vertical: true,
+            orientation: Orientation::Vertical,
             pos: [0, 0],
         };
         assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
@@ -443,7 +466,7 @@ batter.hit repeatedly";
         let horizontal_placed: PlacedWord<'_> = PlacedWord {
             word: "better",
             clue: "superior",
-            is_vertical: false,
+            orientation: Orientation::Horizontal,
             pos: [1, 3],
         };
         assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
