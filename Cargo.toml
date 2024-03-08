@@ -1,6 +1,6 @@
 [package]
 name = "crossyword"
-license = "GPL-3.0-only"
+license = "Apache-2.0"
 version = "0.1.1"
 edition = "2021"
 description = "An awesome crossword puzzle generator"
@@ -13,3 +13,4 @@ keywords = ["crossword"]
 
 [dependencies]
 rand = "0.8.5"
+
