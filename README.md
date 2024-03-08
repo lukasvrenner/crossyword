@@ -13,7 +13,7 @@
 - Place each new word on a new line, and seperate the word and clue with a period (.)
 - For example: `alumina.Aluminium oxide`    
 
-## Licence
+## License
 Copyright 2024 Lukas Renner
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,4 +28,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-See LICENCE for details
+See LICENSE for details
