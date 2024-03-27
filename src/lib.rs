@@ -1,9 +1,12 @@
 use std::fs;
 
 mod generate_layout;
-use crate::generate_layout::{new_puzzle, parse_words};
+use crate::generate_layout::{new_puzzle, parse_words, PlacedWord};
 
-fn main() {
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn create_puzzle() -> Option<Vec<PlacedWord>> {
     let words_file = "./words.txt";
 
     // note: display error to window once GUI is created
@@ -20,6 +23,5 @@ fn main() {
             std::process::exit(1);
         });
 
-    let puzzle = new_puzzle(&formatted_words, 10).unwrap();
-    println!("{:?}", puzzle);
+    new_puzzle(formatted_words, 10)
 }
