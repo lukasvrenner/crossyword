@@ -22,6 +22,7 @@ impl std::ops::Not for Orientation {
 
 /// initial `Word` type, with no additianl metadata
 #[cfg_attr(test, derive(PartialEq, Debug))]
+#[derive(Clone)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -187,7 +188,7 @@ pub struct PlacedWord {
 
 #[wasm_bindgen]
 impl PlacedWord {
-    // workaround for wasm_bindgen issue with Strings in structs 
+    // workaround for wasm_bindgen issue with Strings in structs
     #[wasm_bindgen(getter)]
     pub fn word(&self) -> String {
         self.word.clone()
@@ -210,6 +211,8 @@ impl From<PlacedWordBorrowed<'_>> for PlacedWord {
     }
 }
 
+// might be used in future, but not yet
+#[cfg(test)]
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
     let mut formatted_words = Vec::<Word>::new();
 
