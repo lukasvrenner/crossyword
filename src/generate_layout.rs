@@ -187,13 +187,14 @@ pub struct PlacedWord {
 
 #[wasm_bindgen]
 impl PlacedWord {
+    // workaround for wasm_bindgen issue with Strings in structs 
     #[wasm_bindgen(getter)]
-    pub fn word(&self) {
-        self.word
+    pub fn word(&self) -> String {
+        self.word.clone()
     }
     #[wasm_bindgen(getter)]
-    pub fn clue(&self) {
-        self.clue
+    pub fn clue(&self) -> String {
+        self.clue.clone()
     }
 }
 
