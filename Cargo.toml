@@ -20,6 +20,3 @@ features = ["js"]
 
 [lib]
 crate-type = ["cdylib"]
-
-[build]
-target = "wasm32-unknown-unknown"
