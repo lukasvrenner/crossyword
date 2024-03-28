@@ -227,8 +227,8 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
 }
 
 // consider changing to Puzzle::new()
-/// creates a new `Puzzle` (which is just an alias for `Vec<PlacedWord>`)
-/// given a word list, `word_list`, and a number of words to use, `num_words`
+/// creates a new puzzle given a word list, `word_list`, 
+/// and a number of words to use, `num_words`
 pub fn new_puzzle<'a>(
     word_list: Vec<Word>,
     num_words: usize,
