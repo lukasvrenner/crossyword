@@ -1,6 +1,6 @@
 # Crossyword
 ## A crossword puzzle written in Rust
-<lukasvrenner.github.io/crossyword>
+<https://lukasvrenner.github.io/crossyword>
 
 ## 🧩 Puzzle Generation
 - The current algorithm for generating a puzzle is very basic
