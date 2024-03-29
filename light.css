@@ -1,5 +1,21 @@
 @media (prefers-color-scheme: light) {
     body {
-        background-color: red;
+        background-color: #DEEEEE
+    }
+
+    h1 {
+        color: #121212;
+    }
+    h2 {
+        color: #121212;
+    }
+    h3 {
+        color: #121212;
+    }
+    p {
+        color: #121212;
+    }
+    pre {
+        color: #121212;
     }
 }
