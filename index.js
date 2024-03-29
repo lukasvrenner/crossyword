@@ -53,10 +53,10 @@ function drawClues(puzzle) {
         ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos + 0.5) * boxSize);
         if (word.orientation == Orientation.Vertical) {
             document.getElementById("vertical-clues").innerHTML
-                += (i + 1) + ". " + word.clue + "\n";
+                += (i + 1) + ". " + word.clue + "<br>";
         } else {
             document.getElementById("horizontal-clues").innerHTML
-                += (i + 1) + ". " + word.clue + "\n";
+                += (i + 1) + ". " + word.clue + "<br>";
         }
     }
 }
