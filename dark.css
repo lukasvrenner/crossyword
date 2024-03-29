@@ -10,7 +10,13 @@
     h2 {
         color: #DEEEEE;
     }
+    h3 {
+        color: #DEEEEE;
+    }
     p {
+        color: #DEEEEE;
+    }
+    pre {
         color: #DEEEEE;
     }
 }
