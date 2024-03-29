@@ -229,7 +229,7 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
 // consider changing to Puzzle::new()
 /// creates a new puzzle given a word list, `word_list`, 
 /// and a number of words to use, `num_words`
-pub fn new_puzzle<'a>(
+pub fn new_puzzle(
     word_list: Vec<Word>,
     num_words: usize,
 ) -> Option<Vec<PlacedWord>> {
@@ -256,9 +256,9 @@ pub fn new_puzzle<'a>(
             for word in borred_puzzle {
                 puzzle.push(PlacedWord::from(word));
             }
-            return Some(puzzle);
+            Some(puzzle)
         }
-        None => return None,
+        None => None,
     }
 }
 
