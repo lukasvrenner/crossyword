@@ -10,7 +10,7 @@ function drawPuzzle(puzzle) {
 
     const boxSize = canvas.width / 40;
 
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#000000';
     for (var i = 0; i < puzzle.length; i ++) {
         var word = puzzle[i];
