@@ -12,8 +12,8 @@ const boxSize = canvas.width / 20;
 function drawPuzzle(puzzle) {
 
     ctx.strokeStyle = '#000000';
+    ctx.fillStyle = '#FFFFFF';
     for (var i = 0; i < puzzle.length; i ++) {
-        ctx.fillStyle = '#FFFFFF';
         var word = puzzle[i];
 
         if (word.orientation == Orientation.Horizontal) {
