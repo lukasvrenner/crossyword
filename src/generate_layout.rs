@@ -97,6 +97,8 @@ pub struct PlacedWordBorrowed<'a> {
 
 impl PlacedWordBorrowed<'_> {
     /// returns `true` if `word` overlaps `self`
+    /// they are still considered "overlapping" if the end of one
+    /// word touches the other
     /// otherwise, returns `false`
     /// note: only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWordBorrowed) -> bool {
@@ -473,7 +475,7 @@ batter.hit repeatedly";
             PLACED_WORDS
         ));
 
-        let hori_opposite_orientation_legal: &PlacedWordBorrowed<'_> =
+        let off_by_one_illegal: &PlacedWordBorrowed<'_> =
             &PlacedWordBorrowed {
                 word: "bit",
                 clue: "small amount",
@@ -481,8 +483,8 @@ batter.hit repeatedly";
                 pos: [1, 1],
             };
 
-        assert!(!illegal_overlap(
-            hori_opposite_orientation_legal,
+        assert!(illegal_overlap(
+            off_by_one_illegal,
             PLACED_WORDS
         ));
 

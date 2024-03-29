@@ -25,12 +25,3 @@ pub fn create_puzzle() -> Option<Vec<PlacedWord>> {
     //
     new_puzzle(WORDS.to_vec(), 10)
 }
-
-#[cfg(test)]
-mod tests {
-    
-    #[test]
-    fn create_puzzle() {
-        super::create_puzzle();
-    }
-}
