@@ -1,4 +1,4 @@
-import init, {create_puzzle, Orientation} from "./pkg/crossyword.js";
+import init, {create_puzzle, Orientation} from "./wasm/crossyword.js";
 init().then(() => {
     const puzzle = create_puzzle();
     drawPuzzle(puzzle);
