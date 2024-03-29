@@ -2,17 +2,18 @@ import init, {create_puzzle, Orientation} from "./pkg/crossyword.js";
 init().then(() => {
     const puzzle = create_puzzle();
     drawPuzzle(puzzle);
+    drawClues(puzzle);
 })
 
+const canvas = document.querySelector('#canvas');
+const ctx = canvas.getContext('2d');
+
+const boxSize = canvas.width / 20;
 function drawPuzzle(puzzle) {
-    const canvas = document.querySelector('#canvas');
-    const ctx = canvas.getContext('2d');
 
-    const boxSize = canvas.width / 20;
-
-    ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#000000';
     for (var i = 0; i < puzzle.length; i ++) {
+        ctx.fillStyle = '#FFFFFF';
         var word = puzzle[i];
 
         if (word.orientation == Orientation.Horizontal) {
@@ -28,9 +29,6 @@ function drawPuzzle(puzzle) {
                     boxSize, boxSize);
 
             }
-            // add clues
-            document.getElementById("horizontal-clues").innerHTML
-                += word.clue + "\n";
         } else {
             for (var j = 0; j < word.word.length; j ++) {
                 ctx.fillRect(
@@ -42,11 +40,24 @@ function drawPuzzle(puzzle) {
                     boxSize * (word.ypos + j),
                     boxSize, boxSize);
             }
-            // add clues
-            document.getElementById("vertical-clues").innerHTML
-                += word.clue + "\n";
         }
         
+    }
+}
+
+function drawClues(puzzle) {
+    ctx.fillStyle = "#000000";
+    for (var i = 0; i < puzzle.length; i ++) {
+        var word = puzzle[i];
+        ctx.fillStyle = "#000000";
+        ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos + 0.5) * boxSize);
+        if (word.orientation == Orientation.Vertical) {
+            document.getElementById("vertical-clues").innerHTML
+                += (i + 1) + ". " + word.clue + "\n";
+        } else {
+            document.getElementById("horizontal-clues").innerHTML
+                += (i + 1) + ". " + word.clue + "\n";
+        }
     }
 }
 

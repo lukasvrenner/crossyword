@@ -76,7 +76,7 @@ impl Word<'_> {
             let next_word = PlacedWordBorrowed {
                 word: self.word,
                 clue: self.clue,
-                orientation: Orientation::Horizontal,
+                orientation: Orientation::Vertical,
                 pos: [0, 0],
             };
             return Some(next_word);
