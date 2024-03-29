@@ -107,10 +107,10 @@ impl PlacedWordBorrowed<'_> {
 
         vertical_word.pos[0] >= horizontal_word.pos[0]
             && vertical_word.pos[0] - horizontal_word.pos[0]
-                < horizontal_word.word.len() as isize
+                <= horizontal_word.word.len() as isize
             && horizontal_word.pos[1] >= vertical_word.pos[1]
             && horizontal_word.pos[1] - vertical_word.pos[1]
-                < vertical_word.word.len() as isize
+                <= vertical_word.word.len() as isize
     }
 
     /// returns the number of words in `placed_words` `self` overlaps with
