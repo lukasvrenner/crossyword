@@ -1,4 +1,4 @@
-import init, {create_puzzle} from "./pkg/crossyword.js";
+import init, {create_puzzle, Orientation} from "./pkg/crossyword.js";
 init().then(() => {
     const puzzle = create_puzzle();
     console.log(puzzle);
@@ -8,15 +8,25 @@ function drawPuzzle(puzzle) {
     const canvas = document.querySelector('#canvas');
     const ctx = canvas.getContext('2d');
 
+    const boxSize = canvas.width / 40;
+
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#000000';
     for (var i = 0; i < puzzle.length; i ++) {
-        var word = puzzle[i].word;
+        var word = puzzle[i];
 
-        for (var j = 0; j < word.length; j ++) {
-            ctx.fillRect(25 * j, 25 * i, 25, 25);
-            ctx.strokeRect(25 * j, 25 * i, 25, 25);
+        if (word.orientation == Orientation.Horizontal) {
+            for (var j = 0; j < word.word.length; j ++) {
+                ctx.fillRect((word.xpos + j) * boxSize, boxSize * word.ypos, boxSize, boxSize);
+                ctx.strokeRect((word.xpos + j) * boxSize, boxSize * word.ypos, boxSize, boxSize);
+            }
+        } else {
+            for (var j = 0; j < word.word.length; j ++) {
+                ctx.fillRect(word.xpos * boxSize, boxSize * (word.ypos + j), boxSize, boxSize);
+                ctx.strokeRect(word.xpos * boxSize, boxSize * (word.ypos + j), boxSize, boxSize);
+            }
         }
+        
     }
 }
 
