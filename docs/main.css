@@ -1,5 +1,5 @@
 body {
-    width: 500px;
+    max-width: 600px;
     margin: auto;
     text-align: center;
 }
@@ -20,6 +20,6 @@ canvas {
     /* margin-right: auto; */
     margin-bottom: 15px;
     display: block;
-    width: 500px;
+    width: 100%;
 }
 

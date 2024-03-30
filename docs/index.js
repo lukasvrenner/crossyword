@@ -63,22 +63,21 @@ function drawClues(puzzle) {
 }
 
 function showAnswers(puzzle) {
-    ctx.textAlign = "center";
     for (const word of puzzle) {
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillText(
                     word.word[i], 
-                    (word.xpos + 0.5 + i) * boxSize, 
-                    (word.ypos + 0.5) * boxSize
+                    (word.xpos + 0.4 + i) * boxSize, 
+                    (word.ypos + 0.6) * boxSize
                 );
             }
         } else {
             for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillText(
                     word.word[i], 
-                    (word.xpos + 0.5) * boxSize,
-                    (word.ypos + 0.5 + i) * boxSize
+                    (word.xpos + 0.4) * boxSize,
+                    (word.ypos + 0.6 + i) * boxSize
                 );
             }
         }
