@@ -50,7 +50,7 @@ function drawClues(puzzle) {
     for (var i = 0; i < puzzle.length; i ++) {
         var word = puzzle[i];
         ctx.fillStyle = "#000000";
-        ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos + 0.5) * boxSize);
+        ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos) * boxSize + 10);
         if (word.orientation == Orientation.Vertical) {
             document.getElementById("vertical-clues").innerHTML
                 += (i + 1) + ". " + word.clue + "<br>";
