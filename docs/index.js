@@ -3,41 +3,41 @@ init().then(() => {
     const puzzle = create_puzzle();
     drawPuzzle(puzzle);
     drawClues(puzzle);
+    document.getElementById("show-answers").onclick = ()=>showAnswers(puzzle);
 })
 
 const canvas = document.querySelector('#canvas');
 const ctx = canvas.getContext('2d');
-
 const boxSize = canvas.width / 20;
+
 function drawPuzzle(puzzle) {
 
     ctx.strokeStyle = '#000000';
     ctx.fillStyle = '#FFFFFF';
-    for (var i = 0; i < puzzle.length; i ++) {
-        var word = puzzle[i];
+    for (const word of puzzle) {
 
         if (word.orientation == Orientation.Horizontal) {
-            for (var j = 0; j < word.word.length; j ++) {
+            for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillRect(
-                    (word.xpos + j) * boxSize,
+                    (word.xpos + i) * boxSize,
                     boxSize * word.ypos, 
                     boxSize, boxSize);
 
                 ctx.strokeRect(
-                    (word.xpos + j) * boxSize,
+                    (word.xpos + i) * boxSize,
                     boxSize * word.ypos, 
                     boxSize, boxSize);
 
             }
         } else {
-            for (var j = 0; j < word.word.length; j ++) {
+            for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillRect(
                     word.xpos * boxSize, 
-                    boxSize * (word.ypos + j), 
+                    boxSize * (word.ypos + i), 
                     boxSize, boxSize);
 
                 ctx.strokeRect(word.xpos * boxSize,
-                    boxSize * (word.ypos + j),
+                    boxSize * (word.ypos + i),
                     boxSize, boxSize);
             }
         }
@@ -48,7 +48,7 @@ function drawPuzzle(puzzle) {
 function drawClues(puzzle) {
     ctx.fillStyle = "#000000";
     for (var i = 0; i < puzzle.length; i ++) {
-        var word = puzzle[i];
+        const word = puzzle[i];
         ctx.fillStyle = "#000000";
         ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos) * boxSize + 10);
         if (word.orientation == Orientation.Vertical) {
@@ -57,6 +57,28 @@ function drawClues(puzzle) {
         } else {
             document.getElementById("horizontal-clues").innerHTML
                 += (i + 1) + ". " + word.clue + "<br>";
+        }
+    }
+}
+
+function showAnswers(puzzle) {
+    for (const word of puzzle) {
+        if (word.orientation == Orientation.Horizontal) {
+            for (var i = 0; i < word.word.length; i ++) {
+                ctx.fillText(
+                    word.word[i], 
+                    (word.xpos + 0.5 + i) * boxSize, 
+                    (word.ypos + 0.5) * boxSize
+                );
+            }
+        } else {
+            for (var i = 0; i < word.word.length; i ++) {
+                ctx.fillText(
+                    word.word[i], 
+                    (word.xpos + 0.5) * boxSize,
+                    (word.ypos + 0.5 + i) * boxSize
+                );
+            }
         }
     }
 }

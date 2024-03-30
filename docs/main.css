@@ -1,15 +1,19 @@
 body {
     max-width: 500px;
     margin: auto;
-}
-h1 {
     text-align: center;
 }
 
-h2 {
-    text-align: center;
+h3 {
+    text-align: left;
+}
+
+p {
+    text-align: left;
 }
 
 canvas {
     background-color: black;
+    margin: 15px;
 }
+
