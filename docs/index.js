@@ -9,6 +9,7 @@ init().then(() => {
 const canvas = document.querySelector('#canvas');
 const ctx = canvas.getContext('2d');
 const boxSize = canvas.width / 20;
+ctx.font = "bold 9pt monospace";
 
 function drawPuzzle(puzzle) {
 
@@ -62,6 +63,7 @@ function drawClues(puzzle) {
 }
 
 function showAnswers(puzzle) {
+    ctx.textAlign = "center";
     for (const word of puzzle) {
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {

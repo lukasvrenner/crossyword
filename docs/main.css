@@ -14,6 +14,12 @@ p {
 
 canvas {
     background-color: black;
-    margin: 15px;
+    /* padding-left: 0; */
+    /* padding-right: 0; */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    margin-bottom: 15px;
+    display: block;
+    width: 500px;
 }
 
