@@ -4,12 +4,14 @@
 
 ## Building
 ### Dependencies
-- rustc
+- Rust (rustup, cargo, rustc)
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
-- cargo
-    > cargo is usually installed with rustc
+- wasm32-unknown-unknown compilation target
+```bash
+rustup target add wasm32-unknown-unknown
+```
 - wasm-bindgen-cli 
 ```bash
 cargo install wasm-bindgen-cli
