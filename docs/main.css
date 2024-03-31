@@ -2,12 +2,6 @@
     box-sizing: border-box;
 }
 
-body {
-    margin: auto;
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
 .column-wrapper {
     margin: auto;
     max-width: 500px;
@@ -29,6 +23,15 @@ canvas {
     width: 100%;
 }
 
+/* bottom center */
+.links {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+}
+
 @media screen and (min-width: 1000px) {
     .column-wrapper {
         margin: auto;
@@ -39,12 +42,6 @@ canvas {
         width: 33.33%;
         padding: 10px;
         height: 300px; /* Should be removed. Only for demonstration */
-    }
-    .links {
-        /* text-align: center; */
-        position: fixed;
-        left: 50%;
-        bottom: 5px;
     }
     /* disable columnization */
     .column-wrapper:after {
