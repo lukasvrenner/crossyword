@@ -76,7 +76,7 @@ impl Word<'_> {
             let next_word = PlacedWordBorrowed {
                 word: self.word,
                 clue: self.clue,
-                orientation: Orientation::Horizontal,
+                orientation: Orientation::Vertical,
                 pos: [0, 0],
             };
             return Some(next_word);
@@ -97,6 +97,8 @@ pub struct PlacedWordBorrowed<'a> {
 
 impl PlacedWordBorrowed<'_> {
     /// returns `true` if `word` overlaps `self`
+    /// they are still considered "overlapping" if the end of one
+    /// word touches the other
     /// otherwise, returns `false`
     /// note: only works properly if the words are perpendicular
     fn overlaps(&self, word: &PlacedWordBorrowed) -> bool {
@@ -107,10 +109,10 @@ impl PlacedWordBorrowed<'_> {
 
         vertical_word.pos[0] >= horizontal_word.pos[0]
             && vertical_word.pos[0] - horizontal_word.pos[0]
-                < horizontal_word.word.len() as isize
+                <= horizontal_word.word.len() as isize
             && horizontal_word.pos[1] >= vertical_word.pos[1]
             && horizontal_word.pos[1] - vertical_word.pos[1]
-                < vertical_word.word.len() as isize
+                <= vertical_word.word.len() as isize
     }
 
     /// returns the number of words in `placed_words` `self` overlaps with
@@ -227,9 +229,9 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
 }
 
 // consider changing to Puzzle::new()
-/// creates a new `Puzzle` (which is just an alias for `Vec<PlacedWord>`)
-/// given a word list, `word_list`, and a number of words to use, `num_words`
-pub fn new_puzzle<'a>(
+/// creates a new puzzle given a word list, `word_list`, 
+/// and a number of words to use, `num_words`
+pub fn new_puzzle(
     word_list: Vec<Word>,
     num_words: usize,
 ) -> Option<Vec<PlacedWord>> {
@@ -256,9 +258,9 @@ pub fn new_puzzle<'a>(
             for word in borred_puzzle {
                 puzzle.push(PlacedWord::from(word));
             }
-            return Some(puzzle);
+            Some(puzzle)
         }
-        None => return None,
+        None => None,
     }
 }
 
@@ -473,7 +475,7 @@ batter.hit repeatedly";
             PLACED_WORDS
         ));
 
-        let hori_opposite_orientation_legal: &PlacedWordBorrowed<'_> =
+        let off_by_one_illegal: &PlacedWordBorrowed<'_> =
             &PlacedWordBorrowed {
                 word: "bit",
                 clue: "small amount",
@@ -481,8 +483,8 @@ batter.hit repeatedly";
                 pos: [1, 1],
             };
 
-        assert!(!illegal_overlap(
-            hori_opposite_orientation_legal,
+        assert!(illegal_overlap(
+            off_by_one_illegal,
             PLACED_WORDS
         ));
 

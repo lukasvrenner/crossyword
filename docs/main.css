@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+.column-wrapper {
+    margin: auto;
+    max-width: 500px;
+    text-align: center;
+}
+
+h3 {
+    text-align: left;
+}
+
+p {
+    text-align: left;
+}
+
+canvas {
+    background-color: black;
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+}
+
+/* bottom center */
+.links {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 1000px) {
+    .column-wrapper {
+        margin: auto;
+        max-width: 1500px;
+    }
+    .column {
+        float: left;
+        width: 33.33%;
+        padding: 10px;
+        height: 300px; /* Should be removed. Only for demonstration */
+    }
+    /* disable columnization */
+    .column-wrapper:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+}

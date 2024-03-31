@@ -1,17 +1,27 @@
-## 🖱GUI
-- a GUI is underway, but is not yet complete
+# Crossyword
+## A crossword puzzle written in Rust
+<https://lukasvrenner.github.io/crossyword>
 
-## 🧩 puzzle generation
-- the current algorithm for generating a puzzle is very basic
-- do not expect quality crossword puzzles
-- as of right now, all built-in clues are simply definitions
+## Building
+### Dependencies
+- Rust (rustup, cargo, rustc)
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+- wasm32-unknown-unknown compilation target
+```bash
+rustup target add wasm32-unknown-unknown
+```
+- wasm-bindgen-cli 
+```bash
+cargo install wasm-bindgen-cli
+```
 
-## 📖 words
-- words shipped with crossyword come from [this pdf](https://corporate.lowes.com/sites/lowes-corp/files/2020-01/manhattan_prep_1000_gre_words_.pdf)
-### Using your own words
-- crossyword does not yet support custom files, but you can edit `words.txt` to add your own words
-- Place each new word on a new line, and seperate the word and clue with a period (.)
-- For example: `alumina.Aluminium oxide`    
+### Build
+Run `./build.sh`
+```bash
+./build.sh
+```
 
 ## License
 Copyright 2024 Lukas Renner
@@ -29,3 +39,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 See LICENSE for details
+
+### Words
+- Most words come from [this pdf](https://corporate.lowes.com/sites/lowes-corp/files/2020-01/manhattan_prep_1000_gre_words_.pdf)

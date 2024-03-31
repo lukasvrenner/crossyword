@@ -3,15 +3,23 @@
     body {
         background-color: #121212;
     }
-
     h1 {
         color: #DEEEEE;
     }
     h2 {
         color: #DEEEEE;
     }
+    h3 {
+        color: #DEEEEE;
+    }
     p {
         color: #DEEEEE;
+    }
+    pre {
+        color: #DEEEEE;
+    }
+    a {
+        color: #3388FF;
     }
 }
 

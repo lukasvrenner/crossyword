@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <title>Crossyword</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <meta name="author" content="Lukas Renner">
+        <link rel="stylesheet" href="dark.css" />
+        <link rel="stylesheet" href="light.css" />
+        <link rel="stylesheet" href="main.css" />
+    </head>
+
+    <body>
+        <script type="module" src="./index.js"></script>
+        <div class="column-wrapper">
+            <div id="main" class="column">
+                <div class="title">
+                    <h1>Crossyword</h1>
+                    <h2>A crossword puzzle written in Rust</h2>
+                </div>
+
+                <div class="puzzle">
+                    <canvas id="canvas" height="600" width="600" ></canvas>
+                    <button type="button" id="show-answers">Show Answers</button> 
+                </div>
+            </div>
+            <div class="column" id="vertical">
+                <h3>Vertical</h3>
+                <p id="vertical-clues"></p>
+            </div>
+            <div class="column" id="horizontal">
+                <h3>Horizontal</h3>
+                <p id="horizontal-clues"></p>
+
+            </div>
+        </div>
+        <div class="links">
+            <a href="https://github.com/lukasvrenner/crossyword">
+                Source Code
+            </a>
+        </div>
+    </body>
+</html>
