@@ -25,11 +25,7 @@ canvas {
 
 /* bottom center */
 .links {
-    position: fixed;
-    bottom: 5px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0 auto;
+    text-align: center;
 }
 
 @media screen and (min-width: 1000px) {
@@ -41,7 +37,6 @@ canvas {
         float: left;
         width: 33.33%;
         padding: 10px;
-        height: 300px; /* Should be removed. Only for demonstration */
     }
     /* disable columnization */
     .column-wrapper:after {
