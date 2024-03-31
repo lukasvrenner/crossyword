@@ -38,19 +38,17 @@ canvas {
     }
     .column {
         padding: 1rem;
+        grid-row: 1;
     }
 
     #vertical {
         grid-column: 1;
-        grid-row: 1;
     }
     #main {
         grid-column: 2;
-        grid-row: 1;
     }
     #horizontal {
         grid-column: 3;
-        grid-row: 1;
     }
 }
 
