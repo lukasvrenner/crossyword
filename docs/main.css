@@ -1,6 +1,7 @@
 * {
     box-sizing: border-box;
 }
+
 body {
     margin: auto;
     padding-left: 5px;
@@ -13,7 +14,7 @@ body {
     text-align: center;
 }
 
-h1 {
+h3 {
     text-align: left;
 }
 
