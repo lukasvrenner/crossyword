@@ -3,7 +3,20 @@ init().then(() => {
     const puzzle = create_puzzle();
     drawPuzzle(puzzle);
     drawClues(puzzle);
-    document.getElementById("show-answers").onclick = ()=>showAnswers(puzzle);
+    
+    const showAnswersButton = document.getElementById("show-answers");
+    showAnswersButton.onclick = () => {
+
+        drawPuzzle(puzzle);
+        drawClues(puzzle);
+
+        if (showAnswersButton.innerHTML == "Show Answers") {
+            showAnswersButton.innerHTML = "Hide Answers";
+            showAnswers(puzzle);
+        } else {
+            showAnswersButton.innerHTML = "Show Answers";
+        }
+    }
 })
 
 const canvas = document.querySelector('#canvas');
@@ -12,7 +25,7 @@ const boxSize = canvas.width / 20;
 ctx.font = "bold 9pt monospace";
 
 function drawPuzzle(puzzle) {
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#000000';
     ctx.fillStyle = '#FFFFFF';
     for (const word of puzzle) {
@@ -48,6 +61,10 @@ function drawPuzzle(puzzle) {
 
 function drawClues(puzzle) {
     ctx.fillStyle = "#000000";
+
+    document.getElementById("vertical-clues").innerHTML = "";
+    document.getElementById("horizontal-clues").innerHTML = "";
+
     for (var i = 0; i < puzzle.length; i ++) {
         const word = puzzle[i];
         ctx.fillStyle = "#000000";
@@ -63,6 +80,7 @@ function drawClues(puzzle) {
 }
 
 function showAnswers(puzzle) {
+    ctx.fillStyle = "#000000";
     for (const word of puzzle) {
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {
