@@ -3,7 +3,14 @@ init().then(() => {
     const puzzle = create_puzzle();
     drawPuzzle(puzzle);
     drawClues(puzzle);
-    document.getElementById("show-answers").onclick = ()=>showAnswers(puzzle);
+    document.getElementById("answers-toggle").onclick = () => {
+        if (document.getElementById("answers-toggle").innerHTML == "Show Answers") { 
+            showAnswers(puzzle);
+        }
+        else {
+            hideAnswers(puzzle);
+        }
+    }
 })
 
 const canvas = document.querySelector('#canvas');
@@ -12,46 +19,44 @@ const boxSize = canvas.width / 20;
 ctx.font = "bold 9pt monospace";
 
 function drawPuzzle(puzzle) {
-
     ctx.strokeStyle = '#000000';
-    ctx.fillStyle = '#FFFFFF';
-    for (const word of puzzle) {
+    for (var i = 0; i < puzzle.length; i ++) {
+        const word = puzzle[i];
+        ctx.fillStyle = '#FFFFFF';
 
         if (word.orientation == Orientation.Horizontal) {
-            for (var i = 0; i < word.word.length; i ++) {
+            for (var j = 0; j < word.word.length; j ++) {
                 ctx.fillRect(
-                    (word.xpos + i) * boxSize,
+                    (word.xpos + j) * boxSize,
                     boxSize * word.ypos, 
                     boxSize, boxSize);
 
                 ctx.strokeRect(
-                    (word.xpos + i) * boxSize,
+                    (word.xpos + j) * boxSize,
                     boxSize * word.ypos, 
                     boxSize, boxSize);
 
             }
         } else {
-            for (var i = 0; i < word.word.length; i ++) {
+            for (var j = 0; j < word.word.length; j ++) {
                 ctx.fillRect(
                     word.xpos * boxSize, 
-                    boxSize * (word.ypos + i), 
+                    boxSize * (word.ypos + j), 
                     boxSize, boxSize);
 
                 ctx.strokeRect(word.xpos * boxSize,
-                    boxSize * (word.ypos + i),
+                    boxSize * (word.ypos + j),
                     boxSize, boxSize);
             }
         }
-        
+        ctx.fillStyle = "#000000";
+        ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos) * boxSize + 10);
     }
 }
 
 function drawClues(puzzle) {
-    ctx.fillStyle = "#000000";
     for (var i = 0; i < puzzle.length; i ++) {
         const word = puzzle[i];
-        ctx.fillStyle = "#000000";
-        ctx.fillText(i + 1, word.xpos * boxSize, (word.ypos) * boxSize + 10);
         if (word.orientation == Orientation.Vertical) {
             document.getElementById("vertical-clues").innerHTML
                 += (i + 1) + ". " + word.clue + "<br>";
@@ -63,6 +68,8 @@ function drawClues(puzzle) {
 }
 
 function showAnswers(puzzle) {
+    ctx.fillStyle = "#000000";
+    document.getElementById("answers-toggle").innerHTML = "Hide Answers"
     for (const word of puzzle) {
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {
@@ -84,3 +91,7 @@ function showAnswers(puzzle) {
     }
 }
 
+function hideAnswers(puzzle) {
+    document.getElementById("answers-toggle").innerHTML = "Show Answers"
+    drawPuzzle(puzzle);
+}
