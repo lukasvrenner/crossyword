@@ -113,7 +113,7 @@ function hideAnswers(puzzle) {
 function showGuess(guess, word) {
     ctx.fillStyle="#000000";
     if (word.orientation == Orientation.Horizontal) {
-        for (var i = 0; i < word.word.length; i ++) {
+        for (var i = 0; i < guess.length; i ++) {
             ctx.fillText(
                 guess[i], 
                 (word.xpos + 0.4 + i) * boxSize, 
@@ -121,7 +121,7 @@ function showGuess(guess, word) {
             );
         }
     } else {
-        for (var i = 0; i < word.word.length; i ++) {
+        for (var i = 0; i < guess.length; i ++) {
             ctx.fillText(
                 guess[i], 
                 (word.xpos + 0.4) * boxSize,
