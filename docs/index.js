@@ -8,8 +8,7 @@ init().then(() => {
     document.getElementById("answers-toggle").onclick = () => {
         if (document.getElementById("answers-toggle").innerHTML == "Show Answers") { 
             showAnswers(puzzle);
-        }
-        else {
+        } else {
             hideAnswers(puzzle);
         }
     }
@@ -99,21 +98,21 @@ function drawClues(puzzle, guessedWords) {
 
         const inputField = document.createElement("input");
         inputField.setAttribute("maxlength", word.word.length);
-        (i => {
+        ((i) => {
             inputField.addEventListener("keydown", function (e) {
                 if (e.code === "Enter") {
                     guessedWords[i] = inputField.value;
                     drawPuzzle(puzzle, guessedWords);
                 }
             });
-        }) (i)
+        })(i);
 
         if (word.orientation == Orientation.Vertical) {
-            document.getElementById("vertical").appendChild(clue)
-            document.getElementById("vertical").appendChild(inputField);
+            document.getElementById("down").appendChild(clue)
+            document.getElementById("down").appendChild(inputField);
         } else {
-            document.getElementById("horizontal").appendChild(clue)
-            document.getElementById("horizontal").appendChild(inputField);
+            document.getElementById("across").appendChild(clue)
+            document.getElementById("across").appendChild(inputField);
         }
     }
 }

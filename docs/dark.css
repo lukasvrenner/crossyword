@@ -18,8 +18,15 @@
     pre {
         color: #DEEEEE;
     }
+
     a {
         color: #3388FF;
+    }
+
+    input {
+        background-color: #232323;
+        border-color: #212121;
+        color: #DEEEEE;
     }
 }
 

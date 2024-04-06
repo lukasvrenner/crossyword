@@ -1,19 +1,10 @@
-* {
-    box-sizing: border-box;
-}
-
 .column-wrapper {
     margin: auto;
     max-width: 500px;
+}
+
+#main {
     text-align: center;
-}
-
-h3 {
-    text-align: left;
-}
-
-p {
-    text-align: left;
 }
 
 canvas {
@@ -23,7 +14,6 @@ canvas {
     width: 100%;
 }
 
-/* bottom center */
 .links {
     text-align: center;
 }
@@ -35,19 +25,20 @@ canvas {
         grid-auto-rows: 1fr;
         grid-template-columns: 1fr 1fr 1fr;
     }
-    }
+    
     .column {
         padding: 1rem;
         grid-row: 1;
     }
 
-    #vertical {
+    #down {
         grid-column: 1;
     }
+
     #main {
         grid-column: 2;
     }
-    #horizontal {
+    #across {
         grid-column: 3;
     }
 }
