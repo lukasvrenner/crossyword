@@ -22,7 +22,6 @@ impl std::ops::Not for Orientation {
 
 /// initial `Word` type, with no additianl metadata
 #[cfg_attr(test, derive(PartialEq, Debug))]
-#[derive(Clone)]
 pub struct Word<'a> {
     pub word: &'a str,
     pub clue: &'a str,
@@ -229,7 +228,7 @@ pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
 }
 
 // consider changing to Puzzle::new()
-/// creates a new puzzle given a word list, `word_list`, 
+/// creates a new puzzle given a word list, `word_list`,
 /// and a number of words to use, `num_words`
 pub fn new_puzzle(
     word_list: Vec<Word>,
@@ -475,18 +474,14 @@ batter.hit repeatedly";
             PLACED_WORDS
         ));
 
-        let off_by_one_illegal: &PlacedWordBorrowed<'_> =
-            &PlacedWordBorrowed {
-                word: "bit",
-                clue: "small amount",
-                orientation: Orientation::Horizontal,
-                pos: [1, 1],
-            };
+        let off_by_one_illegal: &PlacedWordBorrowed<'_> = &PlacedWordBorrowed {
+            word: "bit",
+            clue: "small amount",
+            orientation: Orientation::Horizontal,
+            pos: [1, 1],
+        };
 
-        assert!(illegal_overlap(
-            off_by_one_illegal,
-            PLACED_WORDS
-        ));
+        assert!(illegal_overlap(off_by_one_illegal, PLACED_WORDS));
 
         let hori_same_orientation_illegal: &PlacedWordBorrowed<'_> =
             &PlacedWordBorrowed {

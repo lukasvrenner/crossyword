@@ -3,7 +3,7 @@ use crate::generate_layout::{new_puzzle, PlacedWord};
 
 use wasm_bindgen::prelude::*;
 mod words;
-use words::WORDS;
+use words::words;
 
 #[wasm_bindgen]
 pub fn create_puzzle() -> Option<Vec<PlacedWord>> {
@@ -23,5 +23,5 @@ pub fn create_puzzle() -> Option<Vec<PlacedWord>> {
     //         std::process::exit(1);
     //     });
     //
-    new_puzzle(WORDS.to_vec(), 10)
+    new_puzzle(words(), 10)
 }
