@@ -55,6 +55,7 @@ function drawPuzzle(puzzle, guessedWords) {
 }
 
 function drawNumbers(puzzle) {
+    ctx.textAlign = "left";
     ctx.fillStyle = "#000000";
     for (var i = 0; i < puzzle.length; i ++) { 
         const word = puzzle[i];
@@ -63,6 +64,7 @@ function drawNumbers(puzzle) {
 }
 
 function drawGuesses(puzzle, guessedWords) {
+    ctx.textAlign = "center";
     ctx.fillStyle="#000000";
 
     for(var i = 0; i < puzzle.length; i ++) {
@@ -73,7 +75,7 @@ function drawGuesses(puzzle, guessedWords) {
             for (var j = 0; j < guess.length; j ++) {
                 ctx.fillText(
                     guess[j], 
-                    (answer.xpos + 0.4 + j) * boxSize, 
+                    (answer.xpos + 0.5 + j) * boxSize, 
                     (answer.ypos + 0.6) * boxSize
                 );
             }
@@ -81,7 +83,7 @@ function drawGuesses(puzzle, guessedWords) {
             for (var j = 0; j < guess.length; j ++) {
                 ctx.fillText(
                     guess[j], 
-                    (answer.xpos + 0.4) * boxSize,
+                    (answer.xpos + 0.5) * boxSize,
                     (answer.ypos + 0.6 + j) * boxSize
                 );
             }
@@ -98,6 +100,7 @@ function drawClues(puzzle, guessedWords) {
 
         const inputField = document.createElement("input");
         inputField.setAttribute("maxlength", word.word.length);
+
         ((i) => {
             inputField.addEventListener("keydown", function (e) {
                 if (e.code === "Enter") {
@@ -119,13 +122,14 @@ function drawClues(puzzle, guessedWords) {
 
 function showAnswers(puzzle) {
     ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
     document.getElementById("answers-toggle").innerHTML = "Hide Answers"
     for (const word of puzzle) {
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillText(
                     word.word[i], 
-                    (word.xpos + 0.4 + i) * boxSize, 
+                    (word.xpos + 0.5 + i) * boxSize, 
                     (word.ypos + 0.6) * boxSize
                 );
             }
@@ -133,7 +137,7 @@ function showAnswers(puzzle) {
             for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillText(
                     word.word[i], 
-                    (word.xpos + 0.4) * boxSize,
+                    (word.xpos + 0.5) * boxSize,
                     (word.ypos + 0.6 + i) * boxSize
                 );
             }
