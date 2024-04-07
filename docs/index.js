@@ -3,13 +3,13 @@ init().then(() => {
     const puzzle = create_puzzle();
     let guessedWords = Array(puzzle.length).fill("");
 
-    drawPuzzle(puzzle, guessedWords);
+    drawPuzzle(puzzle);
     drawClues(puzzle, guessedWords);
     document.getElementById("answers-toggle").onclick = () => {
         if (document.getElementById("answers-toggle").innerHTML == "Show Answers") { 
             showAnswers(puzzle);
         } else {
-            hideAnswers(puzzle);
+            hideAnswers(puzzle, guessedWords);
         }
     }
 })
@@ -19,7 +19,7 @@ const ctx = canvas.getContext('2d');
 const boxSize = canvas.width / 20;
 ctx.font = "bold 9pt monospace";
 
-function drawPuzzle(puzzle, guessedWords) {
+function drawPuzzle(puzzle) {
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#000000';
     for (const word of puzzle) {
@@ -51,7 +51,6 @@ function drawPuzzle(puzzle, guessedWords) {
         }
     }
     drawNumbers(puzzle);
-    drawGuesses(puzzle, guessedWords);
 }
 
 function drawNumbers(puzzle) {
@@ -91,6 +90,7 @@ function drawGuesses(puzzle, guessedWords) {
     }
 }
 
+// needs to know guessed words to create the listener
 function drawClues(puzzle, guessedWords) {
     for (var i = 0; i < puzzle.length; i ++) {
         const word = puzzle[i];
@@ -106,6 +106,7 @@ function drawClues(puzzle, guessedWords) {
                 if (e.code === "Enter") {
                     guessedWords[i] = inputField.value;
                     drawPuzzle(puzzle, guessedWords);
+                    drawGuesses(puzzle, guessedWords);
                 }
             });
         })(i);
@@ -145,8 +146,9 @@ function showAnswers(puzzle) {
     }
 }
 
-function hideAnswers(puzzle) {
+function hideAnswers(puzzle, guessedWords) {
     document.getElementById("answers-toggle").innerHTML = "Show Answers"
     drawPuzzle(puzzle);
+    drawGuesses(puzzle, guessedWords);
 }
 
