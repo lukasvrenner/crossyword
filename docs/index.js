@@ -7,7 +7,7 @@ init().then(() => {
     drawClues(puzzle, guessedWords);
     document.getElementById("answers-toggle").onclick = () => {
         if (document.getElementById("answers-toggle").innerHTML == "Show Answers") { 
-            showAnswers(puzzle);
+            showAnswers(puzzle, guessedWords);
         } else {
             hideAnswers(puzzle, guessedWords);
         }
@@ -65,6 +65,8 @@ function drawNumbers(puzzle) {
 function drawGuesses(puzzle, guessedWords) {
     ctx.textAlign = "center";
     ctx.fillStyle="#000000";
+    // make sure answer button is reset because answers are hidden
+    document.getElementById("answers-toggle").innerHTML = "Show Answers"
 
     for(var i = 0; i < puzzle.length; i ++) {
         const answer = puzzle[i];
@@ -121,11 +123,14 @@ function drawClues(puzzle, guessedWords) {
     }
 }
 
-function showAnswers(puzzle) {
+function showAnswers(puzzle, guessedWords) {
+    drawPuzzle(puzzle);
     ctx.fillStyle = "#000000";
     ctx.textAlign = "center";
     document.getElementById("answers-toggle").innerHTML = "Hide Answers"
-    for (const word of puzzle) {
+    for (var j = 0; j < puzzle.length; j ++) {
+        const word = puzzle[j];
+        const guess = guessedWords[j];
         if (word.orientation == Orientation.Horizontal) {
             for (var i = 0; i < word.word.length; i ++) {
                 ctx.fillText(
