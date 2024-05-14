@@ -50,7 +50,7 @@ impl Word<'_> {
                 let independant_axis_pos =
                     placed_word.pos[new_orientation as usize] - index as isize;
 
-                let pos: [isize; 2] = match new_orientation {
+                let pos = match new_orientation {
                     Orientation::Vertical => {
                         [dependant_axis_pos, independant_axis_pos]
                     }
@@ -115,11 +115,11 @@ impl PlacedWordBorrowed<'_> {
     }
 
     /// returns the number of words in `placed_words` `self` overlaps with
-    fn number_of_overlaps(&self, placed_words: &[PlacedWordBorrowed]) -> u8 {
-        let mut overlaps = 0u8;
+    fn number_of_overlaps(&self, placed_words: &[PlacedWordBorrowed]) -> usize {
+        let mut overlaps = 0;
         for word in placed_words {
             if self.orientation != word.orientation {
-                overlaps += self.overlaps(word) as u8;
+                overlaps += self.overlaps(word) as usize;
             }
         }
         overlaps
@@ -127,7 +127,7 @@ impl PlacedWordBorrowed<'_> {
 }
 
 trait GetOverlaps {
-    fn total_overlaps(&self) -> u8;
+    fn total_overlaps(&self) -> usize;
 }
 
 trait Shift {
@@ -138,7 +138,7 @@ pub type PuzzleBorrowed<'a> = Vec<PlacedWordBorrowed<'a>>;
 
 impl GetOverlaps for PuzzleBorrowed<'_> {
     /// returns the total number of times two words overlap
-    fn total_overlaps(&self) -> u8 {
+    fn total_overlaps(&self) -> usize {
         let mut total_overlaps = 0;
         // .filter() offers a minor performance boost
         // because we only have to count half of the words
@@ -155,8 +155,8 @@ impl GetOverlaps for PuzzleBorrowed<'_> {
 impl Shift for PuzzleBorrowed<'_> {
     /// shifts puzzle so that all coordinates are >= 0
     fn shift(mut self) -> Self {
-        let mut left_most = 0isize;
-        let mut up_most = 0isize;
+        let mut left_most = 0;
+        let mut up_most = 0;
 
         for word in &self {
             let more_left = left_most > word.pos[0];
@@ -215,7 +215,7 @@ impl From<PlacedWordBorrowed<'_>> for PlacedWord {
 // might be used in future, but not yet
 #[cfg(test)]
 pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
-    let mut formatted_words = Vec::<Word>::new();
+    let mut formatted_words = Vec::new();
 
     for word in all_words.lines() {
         let mut split_word = word.split('.');
@@ -234,8 +234,8 @@ pub fn new_puzzle(
     word_list: Vec<Word>,
     num_words: usize,
 ) -> Option<Vec<PlacedWord>> {
-    let mut best_puzzle = None::<PuzzleBorrowed>;
-    let mut most_ovelaps = 0u8;
+    let mut best_puzzle = None;
+    let mut most_ovelaps = 0;
 
     for _ in 0..50000 {
         let words = get_random_words(&word_list, num_words);
@@ -268,11 +268,11 @@ fn get_random_words<'a>(
     word_list: &'a [Word],
     num_words: usize,
 ) -> Vec<&'a Word<'a>> {
+
     let mut rng = rand::thread_rng();
     let random_indices =
         rand::seq::index::sample(&mut rng, word_list.len(), num_words);
-    let mut random_words = Vec::<&'a Word>::new();
-    random_words.reserve_exact(num_words);
+    let mut random_words = Vec::with_capacity(num_words);
 
     for index in random_indices {
         random_words.push(&word_list[index]);
@@ -282,8 +282,7 @@ fn get_random_words<'a>(
 
 /// attempts to create a crossword puzzle from `words`
 fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<PuzzleBorrowed<'a>> {
-    let mut placed_words: PuzzleBorrowed = Vec::new();
-    placed_words.reserve_exact(words.len());
+    let mut placed_words: PuzzleBorrowed = Vec::with_capacity(words.len());
 
     for word in words {
         placed_words.push(word.place(&placed_words)?);
