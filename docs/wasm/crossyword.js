@@ -76,7 +76,7 @@ function getArrayJsValueFromWasm0(ptr, len) {
     return result;
 }
 /**
-* @returns {(PlacedWord)[] | undefined}
+* @returns {(OutputWord)[] | undefined}
 */
 export function create_puzzle() {
     try {
@@ -106,70 +106,70 @@ function handleError(f, args) {
 */
 export const Orientation = Object.freeze({ Horizontal:0,"0":"Horizontal",Vertical:1,"1":"Vertical", });
 
-const PlacedWordFinalization = (typeof FinalizationRegistry === 'undefined')
+const OutputWordFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_placedword_free(ptr >>> 0));
+    : new FinalizationRegistry(ptr => wasm.__wbg_outputword_free(ptr >>> 0));
 /**
 */
-export class PlacedWord {
+export class OutputWord {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(PlacedWord.prototype);
+        const obj = Object.create(OutputWord.prototype);
         obj.__wbg_ptr = ptr;
-        PlacedWordFinalization.register(obj, obj.__wbg_ptr, obj);
+        OutputWordFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        PlacedWordFinalization.unregister(this);
+        OutputWordFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_placedword_free(ptr);
+        wasm.__wbg_outputword_free(ptr);
     }
     /**
     * @returns {Orientation}
     */
     get orientation() {
-        const ret = wasm.__wbg_get_placedword_orientation(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_outputword_orientation(this.__wbg_ptr);
         return ret;
     }
     /**
     * @param {Orientation} arg0
     */
     set orientation(arg0) {
-        wasm.__wbg_set_placedword_orientation(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_outputword_orientation(this.__wbg_ptr, arg0);
     }
     /**
     * @returns {number}
     */
     get xpos() {
-        const ret = wasm.__wbg_get_placedword_xpos(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_outputword_xpos(this.__wbg_ptr);
         return ret >>> 0;
     }
     /**
     * @param {number} arg0
     */
     set xpos(arg0) {
-        wasm.__wbg_set_placedword_xpos(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_outputword_xpos(this.__wbg_ptr, arg0);
     }
     /**
     * @returns {number}
     */
     get ypos() {
-        const ret = wasm.__wbg_get_placedword_ypos(this.__wbg_ptr);
+        const ret = wasm.__wbg_get_outputword_ypos(this.__wbg_ptr);
         return ret >>> 0;
     }
     /**
     * @param {number} arg0
     */
     set ypos(arg0) {
-        wasm.__wbg_set_placedword_ypos(this.__wbg_ptr, arg0);
+        wasm.__wbg_set_outputword_ypos(this.__wbg_ptr, arg0);
     }
     /**
     * @returns {string}
@@ -179,7 +179,7 @@ export class PlacedWord {
         let deferred1_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.placedword_word(retptr, this.__wbg_ptr);
+            wasm.outputword_word(retptr, this.__wbg_ptr);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             deferred1_0 = r0;
@@ -193,12 +193,12 @@ export class PlacedWord {
     /**
     * @returns {string}
     */
-    get clue() {
+    get clues() {
         let deferred1_0;
         let deferred1_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.placedword_clue(retptr, this.__wbg_ptr);
+            wasm.outputword_clues(retptr, this.__wbg_ptr);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             deferred1_0 = r0;
@@ -245,8 +245,8 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_placedword_new = function(arg0) {
-        const ret = PlacedWord.__wrap(arg0);
+    imports.wbg.__wbg_outputword_new = function(arg0) {
+        const ret = OutputWord.__wrap(arg0);
         return addHeapObject(ret);
     };
     imports.wbg.__wbg_crypto_d05b68a3572bb8ca = function(arg0) {
@@ -277,10 +277,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
-    imports.wbg.__wbg_msCrypto_10fc94afee92bd76 = function(arg0) {
-        const ret = getObject(arg0).msCrypto;
-        return addHeapObject(ret);
-    };
     imports.wbg.__wbg_require_9a7e0f667ead4995 = function() { return handleError(function () {
         const ret = module.require;
         return addHeapObject(ret);
@@ -291,6 +287,10 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm0(arg0, arg1);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_msCrypto_10fc94afee92bd76 = function(arg0) {
+        const ret = getObject(arg0).msCrypto;
         return addHeapObject(ret);
     };
     imports.wbg.__wbg_randomFillSync_b70ccbdf4926a99d = function() { return handleError(function (arg0, arg1) {

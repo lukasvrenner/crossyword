@@ -1,7 +1,6 @@
 //! all of the words used to create puzzles
 use crate::generate_layout::Word;
-pub fn words() -> Vec<Word<'static>> {
-    vec!{
+pub const WORDS: [Word; 996] = [
     Word {
         word: "abase",
         clue: "Degrade or humble; to lower in rank, status, or esteem",
@@ -2991,5 +2990,4 @@ pub fn words() -> Vec<Word<'static>> {
         word: "expurgatory",
         clue: "Serving to purify from anything noxious or erroneous; cleansing; purifying",
     },
-}
-}
+    ];

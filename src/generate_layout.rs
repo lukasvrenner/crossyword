@@ -11,7 +11,7 @@ pub enum Orientation {
 impl std::ops::Not for Orientation {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn not(self) -> Self::Output {
         match self {
             Orientation::Vertical => Orientation::Horizontal,
@@ -22,27 +22,23 @@ impl std::ops::Not for Orientation {
 
 /// initial `Word` type, with no additianl metadata
 #[cfg_attr(test, derive(PartialEq, Debug))]
-pub struct Word<'a> {
-    pub word: &'a str,
-    pub clue: &'a str,
+pub struct Word {
+    pub word: &'static str,
+    pub clue: &'static str,
 }
 
-impl Word<'_> {
+impl Word {
     /// calculates positions for `self`
     /// to join `placed_words`
     /// does *not* add `self` to `placed_words`
-    fn place<'a>(
-        &'a self,
-        placed_words: &[PlacedWordBorrowed<'a>],
-    ) -> Option<PlacedWordBorrowed<'a>> {
+    fn place(&self, placed_words: &[PlacedWord]) -> Option<PlacedWord> {
         for placed_word in placed_words {
             let new_orientation = !placed_word.orientation;
 
             for (index, letter) in self.word.char_indices() {
                 let dependant_axis_pos = match placed_word.word.find(letter) {
                     Some(position) => {
-                        position as isize
-                            + placed_word.pos[!new_orientation as usize]
+                        position as isize + placed_word.pos[!new_orientation as usize]
                     }
                     None => continue,
                 };
@@ -51,15 +47,11 @@ impl Word<'_> {
                     placed_word.pos[new_orientation as usize] - index as isize;
 
                 let pos = match new_orientation {
-                    Orientation::Vertical => {
-                        [dependant_axis_pos, independant_axis_pos]
-                    }
-                    Orientation::Horizontal => {
-                        [independant_axis_pos, dependant_axis_pos]
-                    }
+                    Orientation::Vertical => [dependant_axis_pos, independant_axis_pos],
+                    Orientation::Horizontal => [independant_axis_pos, dependant_axis_pos],
                 };
 
-                let next_word = PlacedWordBorrowed {
+                let next_word = PlacedWord {
                     word: self.word,
                     clue: self.clue,
                     orientation: new_orientation,
@@ -72,7 +64,7 @@ impl Word<'_> {
             }
         }
         if placed_words.is_empty() {
-            let next_word = PlacedWordBorrowed {
+            let next_word = PlacedWord {
                 word: self.word,
                 clue: self.clue,
                 orientation: Orientation::Vertical,
@@ -87,35 +79,33 @@ impl Word<'_> {
 /// like `Word`, but with additional metadata
 #[cfg_attr(test, derive(PartialEq, Clone, Copy))]
 #[derive(Debug)] // only for development purposes -- remove once GUI is created
-pub struct PlacedWordBorrowed<'a> {
-    pub word: &'a str,
-    pub clue: &'a str,
+pub struct PlacedWord {
+    pub word: &'static str,
+    pub clue: &'static str,
     pub orientation: Orientation,
     pub pos: [isize; 2],
 }
 
-impl PlacedWordBorrowed<'_> {
+impl PlacedWord {
     /// returns `true` if `word` overlaps `self`
     /// they are still considered "overlapping" if the end of one
     /// word touches the other
     /// otherwise, returns `false`
     /// note: only works properly if the words are perpendicular
-    fn overlaps(&self, word: &PlacedWordBorrowed) -> bool {
+    fn overlaps(&self, word: &PlacedWord) -> bool {
         let (vertical_word, horizontal_word) = match self.orientation {
             Orientation::Vertical => (self, word),
             Orientation::Horizontal => (word, self),
         };
 
         vertical_word.pos[0] >= horizontal_word.pos[0]
-            && vertical_word.pos[0] - horizontal_word.pos[0]
-                <= horizontal_word.word.len() as isize
+            && vertical_word.pos[0] - horizontal_word.pos[0] <= horizontal_word.word.len() as isize
             && horizontal_word.pos[1] >= vertical_word.pos[1]
-            && horizontal_word.pos[1] - vertical_word.pos[1]
-                <= vertical_word.word.len() as isize
+            && horizontal_word.pos[1] - vertical_word.pos[1] <= vertical_word.word.len() as isize
     }
 
     /// returns the number of words in `placed_words` `self` overlaps with
-    fn number_of_overlaps(&self, placed_words: &[PlacedWordBorrowed]) -> usize {
+    fn number_of_overlaps(&self, placed_words: &[PlacedWord]) -> usize {
         let mut overlaps = 0;
         for word in placed_words {
             if self.orientation != word.orientation {
@@ -126,17 +116,49 @@ impl PlacedWordBorrowed<'_> {
     }
 }
 
+#[wasm_bindgen]
+pub struct OutputWord {
+    #[wasm_bindgen(skip)]
+    pub word: &'static str,
+    #[wasm_bindgen(skip)]
+    pub clue: &'static str,
+    pub orientation: Orientation,
+    pub xpos: usize,
+    pub ypos: usize,
+}
+
+#[wasm_bindgen]
+impl OutputWord {
+    #[wasm_bindgen(getter)]
+    pub fn word(&self) -> String {
+        self.word.to_owned()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn clues(&self) -> String {
+        self.clue.to_owned()
+    }
+}
+
+impl From<PlacedWord> for OutputWord {
+    fn from(value: PlacedWord) -> Self {
+        Self {
+            word: value.word,
+            clue: value.clue,
+            orientation: value.orientation,
+            xpos: value.pos[0] as usize,
+            ypos: value.pos[1] as usize,
+        }
+    }
+}
+
 trait GetOverlaps {
     fn total_overlaps(&self) -> usize;
 }
 
-trait Shift {
-    fn shift(self) -> Self;
-}
+pub type PuzzleBorrowed = Vec<PlacedWord>;
 
-pub type PuzzleBorrowed<'a> = Vec<PlacedWordBorrowed<'a>>;
-
-impl GetOverlaps for PuzzleBorrowed<'_> {
+impl GetOverlaps for PuzzleBorrowed {
     /// returns the total number of times two words overlap
     fn total_overlaps(&self) -> usize {
         let mut total_overlaps = 0;
@@ -152,94 +174,33 @@ impl GetOverlaps for PuzzleBorrowed<'_> {
     }
 }
 
-impl Shift for PuzzleBorrowed<'_> {
-    /// shifts puzzle so that all coordinates are >= 0
-    fn shift(mut self) -> Self {
-        let mut left_most = 0;
-        let mut up_most = 0;
+fn allign_puzzle(puzzle: &mut [PlacedWord]) {
+    let mut left_most = 0;
+    let mut up_most = 0;
 
-        for word in &self {
-            let more_left = left_most > word.pos[0];
-            let more_up = up_most > word.pos[1];
-            left_most = word.pos[0] * more_left as isize
-                + left_most * !more_left as isize;
-            up_most =
-                word.pos[1] * more_up as isize + up_most * !more_up as isize;
-        }
-
-        for word in &mut self {
-            word.pos[0] -= left_most;
-            word.pos[1] -= up_most;
-        }
-        self
+    for word in &*puzzle {
+        let more_left = left_most > word.pos[0];
+        let more_up = up_most > word.pos[1];
+        left_most = word.pos[0] * more_left as isize + left_most * !more_left as isize;
+        up_most = word.pos[1] * more_up as isize + up_most * !more_up as isize;
     }
-}
 
-#[derive(Debug)]
-#[wasm_bindgen]
-pub struct PlacedWord {
-    #[wasm_bindgen(skip)]
-    pub word: String,
-    #[wasm_bindgen(skip)]
-    pub clue: String,
-    pub orientation: Orientation,
-    pub xpos: usize,
-    pub ypos: usize,
-}
-
-#[wasm_bindgen]
-impl PlacedWord {
-    // workaround for wasm_bindgen issue with Strings in structs
-    #[wasm_bindgen(getter)]
-    pub fn word(&self) -> String {
-        self.word.clone()
+    for word in puzzle {
+        word.pos[0] -= left_most;
+        word.pos[1] -= up_most;
     }
-    #[wasm_bindgen(getter)]
-    pub fn clue(&self) -> String {
-        self.clue.clone()
-    }
-}
-
-impl From<PlacedWordBorrowed<'_>> for PlacedWord {
-    fn from(value: PlacedWordBorrowed) -> Self {
-        PlacedWord {
-            word: value.word.to_owned(),
-            clue: value.clue.to_owned(),
-            orientation: value.orientation,
-            xpos: value.pos[0] as usize,
-            ypos: value.pos[1] as usize,
-        }
-    }
-}
-
-// might be used in future, but not yet
-#[cfg(test)]
-pub fn parse_words(all_words: &str) -> Option<Vec<Word>> {
-    let mut formatted_words = Vec::new();
-
-    for word in all_words.lines() {
-        let mut split_word = word.split('.');
-        formatted_words.push(Word {
-            word: split_word.next()?,
-            clue: split_word.next()?,
-        })
-    }
-    Some(formatted_words)
 }
 
 // consider changing to Puzzle::new()
 /// creates a new puzzle given a word list, `word_list`,
 /// and a number of words to use, `num_words`
-pub fn new_puzzle(
-    word_list: Vec<Word>,
-    num_words: usize,
-) -> Option<Vec<PlacedWord>> {
+pub fn new_puzzle(word_list: &[Word], num_words: usize) -> Option<Vec<OutputWord>> {
     let mut best_puzzle = None;
     let mut most_ovelaps = 0;
 
     for _ in 0..50000 {
         let words = get_random_words(&word_list, num_words);
-        match generate_layout(&words) {
+        match generate_layout(words.as_ref()) {
             Some(puzzle) => {
                 let overlaps = puzzle.total_overlaps();
                 if overlaps > most_ovelaps {
@@ -252,10 +213,10 @@ pub fn new_puzzle(
     }
     match best_puzzle {
         Some(mut borred_puzzle) => {
-            borred_puzzle = borred_puzzle.shift();
-            let mut puzzle = Vec::new();
+            allign_puzzle(&mut borred_puzzle);
+            let mut puzzle = Vec::with_capacity(borred_puzzle.len());
             for word in borred_puzzle {
-                puzzle.push(PlacedWord::from(word));
+                puzzle.push(OutputWord::from(word));
             }
             Some(puzzle)
         }
@@ -264,14 +225,9 @@ pub fn new_puzzle(
 }
 
 /// uses `rand` crate to pick `num_words` words
-fn get_random_words<'a>(
-    word_list: &'a [Word],
-    num_words: usize,
-) -> Vec<&'a Word<'a>> {
-
+fn get_random_words<'a>(word_list: &'a [Word], num_words: usize) -> Vec<&'a Word> {
     let mut rng = rand::thread_rng();
-    let random_indices =
-        rand::seq::index::sample(&mut rng, word_list.len(), num_words);
+    let random_indices = rand::seq::index::sample(&mut rng, word_list.len(), num_words);
     let mut random_words = Vec::with_capacity(num_words);
 
     for index in random_indices {
@@ -281,7 +237,7 @@ fn get_random_words<'a>(
 }
 
 /// attempts to create a crossword puzzle from `words`
-fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<PuzzleBorrowed<'a>> {
+fn generate_layout(words: &[&Word]) -> Option<PuzzleBorrowed> {
     let mut placed_words: PuzzleBorrowed = Vec::with_capacity(words.len());
 
     for word in words {
@@ -294,10 +250,7 @@ fn generate_layout<'a>(words: &[&'a Word<'a>]) -> Option<PuzzleBorrowed<'a>> {
 ///
 /// an overlap is considered "illegal" if the letters at the place of overlap
 /// are not the same
-fn illegal_overlap(
-    next_word: &PlacedWordBorrowed<'_>,
-    placed_words: &[PlacedWordBorrowed<'_>],
-) -> bool {
+fn illegal_overlap(next_word: &PlacedWord, placed_words: &[PlacedWord]) -> bool {
     let mut illegal = false;
     for placed_word in placed_words {
         if placed_word.orientation != next_word.orientation {
@@ -321,13 +274,11 @@ fn illegal_overlap(
             let is_vertical = next_word.orientation as usize;
             let is_horizontal = !next_word.orientation as usize;
 
-            illegal = (next_word.pos[is_vertical]
-                - placed_word.pos[is_vertical]
+            illegal = (next_word.pos[is_vertical] - placed_word.pos[is_vertical]
                 < next_word.word.len() as isize
                 || placed_word.pos[is_vertical] - next_word.pos[is_vertical]
                     < placed_word.word.len() as isize)
-                && placed_word.pos[is_horizontal]
-                    == next_word.pos[is_horizontal];
+                && placed_word.pos[is_horizontal] == next_word.pos[is_horizontal];
         }
 
         if illegal {
@@ -342,45 +293,26 @@ fn illegal_overlap(
 mod tests {
     use super::*;
 
-    const WORDS: &[Word<'_>] = &[
-        Word {
-            word: "cat",
-            clue: "an animal of group cat",
-        },
-        Word {
-            word: "tiger",
-            clue: "a wild species of cat",
-        },
-        Word {
-            word: "ought",
-            clue: "should",
-        },
-        Word {
-            word: "batter",
-            clue: "hit repeatedly",
-        },
-    ];
-
-    const PLACED_WORDS: &[PlacedWordBorrowed<'_>] = &[
-        PlacedWordBorrowed {
+    const PLACED_WORDS: [PlacedWord; 4] = [
+        PlacedWord {
             word: "cat",
             clue: "an animal of group cat",
             orientation: Orientation::Horizontal,
             pos: [0, 0],
         },
-        PlacedWordBorrowed {
+        PlacedWord {
             word: "tiger",
             clue: "a wild species of cat",
             orientation: Orientation::Vertical,
             pos: [2, 0],
         },
-        PlacedWordBorrowed {
+        PlacedWord {
             word: "ought",
             clue: "should",
             orientation: Orientation::Horizontal,
             pos: [0, 2],
         },
-        PlacedWordBorrowed {
+        PlacedWord {
             word: "batter",
             clue: "hit repeatedly",
             orientation: Orientation::Vertical,
@@ -404,16 +336,6 @@ mod tests {
     */
 
     #[test]
-    fn parse() {
-        let unparsed = "cat.an animal of group cat
-tiger.a wild species of cat
-ought.should
-batter.hit repeatedly";
-
-        assert_eq!(WORDS, parse_words(unparsed).unwrap());
-    }
-
-    #[test]
     fn word_overlaps_other_word() {
         assert!(PLACED_WORDS[1].overlaps(&PLACED_WORDS[2]));
         assert!(!PLACED_WORDS[0].overlaps(&PLACED_WORDS[3]));
@@ -422,112 +344,107 @@ batter.hit repeatedly";
 
     #[test]
     fn count_individual_word_overlaps() {
-        assert_eq!(PLACED_WORDS[0].number_of_overlaps(PLACED_WORDS), 1);
-        assert_eq!(PLACED_WORDS[1].number_of_overlaps(PLACED_WORDS), 2);
+        assert_eq!(&PLACED_WORDS[0].number_of_overlaps(&PLACED_WORDS), &1);
+        assert_eq!(&PLACED_WORDS[1].number_of_overlaps(&PLACED_WORDS), &2);
     }
 
     #[test]
     fn count_total_overlaps() {
-        let words_as_vec = PLACED_WORDS.to_vec();
+        let words_as_vec = &PLACED_WORDS.to_vec();
         assert_eq!(words_as_vec.total_overlaps(), 3);
     }
 
     #[test]
     fn illegal() {
-        let vert_opposite_orientation_illegal: &PlacedWordBorrowed<'_> =
-            &PlacedWordBorrowed {
-                word: "assess",
-                clue: "to determine information from",
-                orientation: Orientation::Vertical,
-                pos: [1, 0],
-            };
+        let vert_opposite_orientation_illegal: PlacedWord = PlacedWord {
+            word: "assess",
+            clue: "to determine information from",
+            orientation: Orientation::Vertical,
+            pos: [1, 0],
+        };
 
         assert!(illegal_overlap(
-            vert_opposite_orientation_illegal,
-            PLACED_WORDS
+            &vert_opposite_orientation_illegal,
+            &PLACED_WORDS
         ));
 
-        let vert_opposite_orientation_legal: &PlacedWordBorrowed<'_> =
-            &PlacedWordBorrowed {
-                word: "alumina",
-                clue: "aluminium oxide",
-                orientation: Orientation::Vertical,
-                pos: [1, 0],
-            };
+        let vert_opposite_orientation_legal: PlacedWord = PlacedWord {
+            word: "alumina",
+            clue: "aluminium oxide",
+            orientation: Orientation::Vertical,
+            pos: [1, 0],
+        };
 
         assert!(!illegal_overlap(
-            vert_opposite_orientation_legal,
-            PLACED_WORDS
+            &vert_opposite_orientation_legal,
+            &PLACED_WORDS
         ));
 
-        let hori_opposite_orientation_illegal: &PlacedWordBorrowed<'_> =
-            &PlacedWordBorrowed {
-                word: "bitter",
-                clue: "having a sharp, pungent taste or smell",
-                orientation: Orientation::Vertical,
-                pos: [1, 0],
-            };
+        let hori_opposite_orientation_illegal: PlacedWord = PlacedWord {
+            word: "bitter",
+            clue: "having a sharp, pungent taste or smell",
+            orientation: Orientation::Vertical,
+            pos: [1, 0],
+        };
 
         assert!(illegal_overlap(
-            hori_opposite_orientation_illegal,
-            PLACED_WORDS
+            &hori_opposite_orientation_illegal,
+            &PLACED_WORDS
         ));
 
-        let off_by_one_illegal: &PlacedWordBorrowed<'_> = &PlacedWordBorrowed {
+        let off_by_one_illegal: PlacedWord = PlacedWord {
             word: "bit",
             clue: "small amount",
             orientation: Orientation::Horizontal,
             pos: [1, 1],
         };
 
-        assert!(illegal_overlap(off_by_one_illegal, PLACED_WORDS));
+        assert!(illegal_overlap(&off_by_one_illegal, &PLACED_WORDS));
 
-        let hori_same_orientation_illegal: &PlacedWordBorrowed<'_> =
-            &PlacedWordBorrowed {
-                word: "its",
-                clue: "posessive case of it",
-                orientation: Orientation::Horizontal,
-                pos: [3, 2],
-            };
+        let hori_same_orientation_illegal: PlacedWord = PlacedWord {
+            word: "its",
+            clue: "posessive case of it",
+            orientation: Orientation::Horizontal,
+            pos: [3, 2],
+        };
 
-        assert!(illegal_overlap(hori_same_orientation_illegal, PLACED_WORDS));
+        assert!(illegal_overlap(
+            &hori_same_orientation_illegal,
+            &PLACED_WORDS
+        ));
     }
 
     #[test]
     fn calc_position() {
-        let vertical: Word<'_> = Word {
+        let vertical: Word = Word {
             word: "crouch",
             clue: "kneel",
         };
 
-        let vertical_placed: PlacedWordBorrowed<'_> = PlacedWordBorrowed {
+        let vertical_placed: PlacedWord = PlacedWord {
             word: "crouch",
             clue: "kneel",
             orientation: Orientation::Vertical,
             pos: [0, 0],
         };
-        assert_eq!(vertical.place(PLACED_WORDS), Some(vertical_placed));
+        assert_eq!(vertical.place(&PLACED_WORDS), Some(vertical_placed));
 
-        let no_possible_pos: Word<'_> = Word {
+        let no_possible_pos: Word = Word {
             word: "snaps",
             clue: "breaks",
         };
-        assert_eq!(no_possible_pos.place(PLACED_WORDS), None);
+        assert_eq!(no_possible_pos.place(&PLACED_WORDS), None);
 
-        let horizontal: Word<'_> = Word {
+        let horizontal: Word = Word {
             word: "better",
             clue: "superior",
         };
-        let horizontal_placed: PlacedWordBorrowed<'_> = PlacedWordBorrowed {
+        let horizontal_placed: PlacedWord = PlacedWord {
             word: "better",
             clue: "superior",
             orientation: Orientation::Horizontal,
             pos: [1, 3],
         };
-        assert_eq!(horizontal.place(PLACED_WORDS), Some(horizontal_placed));
+        assert_eq!(horizontal.place(&PLACED_WORDS), Some(horizontal_placed));
     }
-
-    // #[test]
-    // fn shift() {
-    // }
 }
