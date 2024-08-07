@@ -96,8 +96,8 @@ function drawGuesses(puzzle, guessedWords) {
 function drawClues(puzzle, guessedWords) {
     for (var i = 0; i < puzzle.length; i ++) {
         const word = puzzle[i];
-
         const clue = document.createElement("p");
+        console.log(word.clue);
         clue.innerText = (i + 1) + ". " + word.clue;
 
         const inputField = document.createElement("input");

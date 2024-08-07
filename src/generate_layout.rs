@@ -78,7 +78,6 @@ impl Word {
 
 /// like `Word`, but with additional metadata
 #[cfg_attr(test, derive(PartialEq, Clone, Copy))]
-#[derive(Debug)] // only for development purposes -- remove once GUI is created
 pub struct PlacedWord {
     pub word: &'static str,
     pub clue: &'static str,
@@ -135,7 +134,7 @@ impl OutputWord {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn clues(&self) -> String {
+    pub fn clue(&self) -> String {
         self.clue.to_owned()
     }
 }
