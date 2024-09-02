@@ -77,7 +77,7 @@ impl Word {
 }
 
 /// like `Word`, but with additional metadata
-#[cfg_attr(test, derive(PartialEq, Clone, Copy))]
+#[cfg_attr(test, derive(Debug, PartialEq, Clone, Copy))]
 pub struct PlacedWord {
     pub word: &'static str,
     pub clue: &'static str,
