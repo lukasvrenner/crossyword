@@ -14,6 +14,11 @@ canvas {
     width: 100%;
 }
 
+footer {
+    text-align: center;
+    padding: 1rem;
+}
+
 .links {
     text-align: center;
 }
